@@ -3,548 +3,705 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The 8-Fold — a cloth you never touch the dirty side of</title>
+<title>Eight clean surfaces — one square, two folds, one path</title>
 <style>
-:root{
-  --bg:#080b10; --panel:#111923; --panel2:#0d141c;
-  --line:#1e2a36; --line2:#2b3b4b;
-  --ink:#e7eff6; --mut:#8ba0b4; --dim:#5d6f81;
-  --clean:#14b8a6; --dirty:#ef6a4c; --gold:#fbbf24; --blue:#60a5fa;
-  --r:13px;
-}
+:root{--bg:#070a0f;--panel:#111923;--panel2:#0c131a;--line:#1e2a36;--line2:#2b3b4b;
+ --ink:#e7eff6;--mut:#8ba0b4;--dim:#5d6f81;--clean:#14b8a6;--dirty:#ef6a4c;--gold:#fbbf24;--bad:#f43f5e;--r:13px}
 *{box-sizing:border-box}
 html,body{height:100%}
-body{
-  margin:0; color:var(--ink);
-  background:radial-gradient(1300px 900px at 50% -12%,#17222e 0%,var(--bg) 62%);
-  font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,sans-serif;
-  -webkit-font-smoothing:antialiased;
-}
-.app{max-width:1320px;margin:0 auto;padding:26px 22px 60px}
-header{display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;margin-bottom:22px}
-h1{font-size:26px;letter-spacing:-.02em;margin:0;font-weight:650}
+body{margin:0;color:var(--ink);background:radial-gradient(1200px 850px at 50% -14%,#16212c 0%,var(--bg) 62%);
+ font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.app{max-width:1340px;margin:0 auto;padding:24px 22px 60px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;margin-bottom:20px}
+h1{font-size:25px;letter-spacing:-.022em;margin:0;font-weight:650}
 h1 em{font-style:normal;color:var(--clean)}
-.tag{margin:0;color:var(--mut);font-size:14.5px}
-.dot{width:11px;height:11px;border-radius:3px;background:linear-gradient(135deg,var(--clean),var(--dirty));
-  display:inline-block;margin-right:11px;transform:translateY(1px)}
-
-main{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:22px;align-items:start}
-@media(max-width:1000px){main{grid-template-columns:1fr}}
-
-/* ---------- stage ---------- */
+.tag{margin:0;color:var(--mut);font-size:14px}
+.sw2{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:10px;transform:translateY(1px);
+ background:linear-gradient(135deg,#22c3b0,#ef6a4c)}
+main{display:grid;grid-template-columns:minmax(0,1fr) 372px;gap:20px;align-items:start}
+@media(max-width:1040px){main{grid-template-columns:1fr}}
 .stage-col{background:var(--panel2);border:1px solid var(--line);border-radius:18px;overflow:hidden}
-.stage{
-  position:relative; height:min(66vh,560px); min-height:380px;
-  perspective:1500px; perspective-origin:50% 46%;
-  background:radial-gradient(900px 500px at 50% 30%,#111b24,#0a0e14 75%);
-  cursor:grab; touch-action:none; overflow:hidden;
-}
+.stage{position:relative;height:min(64vh,540px);min-height:370px;perspective:1450px;perspective-origin:50% 44%;
+ background:radial-gradient(760px 480px at 50% 32%,#121c26,#080c12 76%);cursor:grab;touch-action:none;overflow:hidden}
 .stage.drag{cursor:grabbing}
-.orbit{position:absolute;left:50%;top:50%;width:480px;height:320px;margin:-160px 0 0 -240px;
-  transform-style:preserve-3d}
-.cloth{position:absolute;inset:0;transform-style:preserve-3d}
-
-.mat{position:absolute;left:0;top:0;width:608px;height:448px;border-radius:12px;
-  transform:translate(-64px,-64px) translateZ(-5px);
-  background:
-    linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px) 0 0/40px 40px,
-    linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px) 0 0/40px 40px,
-    linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px) 0 0/200px 200px,
-    linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px) 0 0/200px 200px,
-    #101a22;
-  border:1px solid rgba(255,255,255,.09);
-  box-shadow:0 40px 70px rgba(0,0,0,.55), inset 0 0 60px rgba(0,0,0,.4);
-}
-.guides{position:absolute;left:0;top:0;width:480px;height:320px;transform-style:preserve-3d;
-  transition:opacity .4s; pointer-events:none}
-.gl{position:absolute;background:repeating-linear-gradient(var(--dir,90deg),
-  var(--gold) 0 7px,transparent 7px 14px);opacity:.5}
-.gv{--dir:90deg;width:2px;top:-40px;height:400px}
-.gh{--dir:180deg;height:2px;left:-40px;width:560px}
-.badge{position:absolute;width:23px;height:23px;border-radius:50%;display:grid;place-items:center;
-  font-size:12px;font-weight:700;color:#0a0f14;background:var(--gold);
-  box-shadow:0 0 0 4px rgba(251,191,36,.16);transform:translateZ(-.1px)}
-
-.cell{position:absolute;left:0;top:0;width:120px;height:160px;transform-origin:0 0;
-  transform-style:preserve-3d;--sh:.28;--hi:.07}
-.f{position:absolute;inset:0;backface-visibility:hidden;border-radius:3px;overflow:hidden;
-  display:grid;place-items:center;border:1px dashed transparent;
-  box-shadow:0 1px 0 rgba(255,255,255,.06) inset}
+.orbit{position:absolute;left:50%;top:50%;width:260px;height:260px;margin:-130px 0 0 -130px;transform-style:preserve-3d}
+.cloth{position:absolute;inset:0;transform:matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,10,10,0,1);transform-style:preserve-3d}
+.ghost{position:absolute;left:0;top:0;width:240px;height:240px;transform:translateZ(-9px);pointer-events:none;
+ border:1px dashed rgba(251,191,36,.30);border-radius:2px;transition:opacity .5s}
+.guides{position:absolute;left:0;top:0;width:240px;height:240px;transform:translateZ(-7px);pointer-events:none;transition:opacity .5s}
+.gl{position:absolute;background:repeating-linear-gradient(var(--d,90deg),rgba(251,191,36,.5) 0 6px,transparent 6px 13px)}
+.gv{--d:90deg;width:1.5px;top:-34px;height:308px;left:120px}
+.gh{--d:180deg;height:1.5px;left:-34px;width:308px;top:120px}
+.badge{position:absolute;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11.5px;
+ font-weight:700;color:#0a0f14;background:var(--gold);box-shadow:0 0 0 4px rgba(251,191,36,.15)}
+.cell{position:absolute;left:0;top:0;width:120px;height:120px;transform-origin:0 0;transform-style:preserve-3d;--sh:.28;--hi:.07}
+.f{position:absolute;inset:0;backface-visibility:hidden;border-radius:2px;overflow:hidden;display:grid;place-items:center;
+ border:1px dashed transparent;cursor:crosshair;box-shadow:0 1px 0 rgba(255,255,255,.06) inset}
 .f::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(rgba(255,255,255,var(--hi)),rgba(255,255,255,0)),
-             rgba(3,8,14,var(--sh))}
-.show-creases .f{border-color:rgba(255,255,255,.22)}
-.f-front{background:
-  repeating-linear-gradient(45deg,rgba(255,255,255,.055) 0 7px,transparent 7px 14px),
-  linear-gradient(158deg,#22c3b0,#0e9189 55%,#0a6b73);color:#eafffb}
-.f-back{transform:rotateY(180deg);background:
-  repeating-linear-gradient(45deg,rgba(0,0,0,.17) 0 6px,rgba(255,255,255,.05) 6px 12px),
-  linear-gradient(158deg,#f0744f,#c7452c 55%,#8d2e1f);color:#ffeee7}
-.f b{font-size:34px;font-weight:700;letter-spacing:-.03em;opacity:.92;
-  text-shadow:0 2px 10px rgba(0,0,0,.35)}
-.f-back b{font-size:24px;opacity:.55}
-.f i{position:absolute;bottom:7px;left:0;right:0;text-align:center;font-style:normal;
-  font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;opacity:.62}
+ background:linear-gradient(rgba(255,255,255,var(--hi)),rgba(255,255,255,0)),rgba(3,8,14,var(--sh))}
+.show-creases .f{border-color:rgba(255,255,255,.20)}
+.f-front{background:repeating-linear-gradient(45deg,rgba(255,255,255,.055) 0 7px,transparent 7px 14px),
+ linear-gradient(158deg,#22c3b0,#0e9189 55%,#0a6b73);color:#eafffb}
+.f-back{transform:rotateY(180deg);background:repeating-linear-gradient(45deg,rgba(0,0,0,.17) 0 6px,rgba(255,255,255,.05) 6px 12px),
+ linear-gradient(158deg,#f0744f,#c7452c 55%,#8d2e1f);color:#ffeee7}
+.f b{font-size:30px;font-weight:700;letter-spacing:-.03em;opacity:.9;text-shadow:0 2px 10px rgba(0,0,0,.35)}
+.f i{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-style:normal;font-size:8.5px;
+ letter-spacing:.1em;text-transform:uppercase;opacity:.6}
+.zname{position:absolute;top:5px;left:5px;right:5px;text-align:center;font-size:10px;font-weight:650;padding:3px 4px;
+ border-radius:5px;background:rgba(4,10,14,.74);opacity:0;transition:opacity .25s;z-index:3}
+.f.hi .zname{opacity:1}
+.wipe{position:absolute;inset:0;opacity:0;pointer-events:none;z-index:2;
+ background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.85) 50%,transparent 62%)}
+.f.wiping .wipe{animation:sweep .52s ease-in-out 3}
+@keyframes sweep{0%{opacity:0;transform:translateX(-115%)}18%{opacity:1}82%{opacity:1}100%{opacity:0;transform:translateX(115%)}}
 .f.hi{outline:3px solid var(--gold);outline-offset:-3px}
-.f.used{filter:grayscale(.85) brightness(.5)}
-.f.used::before{content:"";position:absolute;inset:0;
-  background:repeating-conic-gradient(rgba(0,0,0,.3) 0 25%,rgba(255,255,255,.09) 0 50%) 0 0/14px 14px}
-
-.hud{position:absolute;left:16px;top:14px;z-index:5;display:flex;flex-direction:column;gap:6px;
-  pointer-events:none}
-.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;
-  background:rgba(9,14,20,.78);border:1px solid var(--line2);font-size:12.5px;color:var(--mut);
-  backdrop-filter:blur(8px);width:fit-content}
+.f.used::before{content:"";position:absolute;inset:0;z-index:1;
+ background:repeating-conic-gradient(rgba(0,0,0,.30) 0 25%,rgba(255,255,255,.10) 0 50%) 0 0/13px 13px}
+.f.spoil{outline:3px solid var(--bad);outline-offset:-3px}
+.load{position:absolute;bottom:21px;left:50%;transform:translateX(-50%);z-index:4;display:none;padding:2px 7px;
+ border-radius:99px;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#070c11;background:#fff;white-space:nowrap}
+.f.hasload .load{display:block}
+.hud{position:absolute;left:15px;top:13px;z-index:5;display:flex;flex-direction:column;gap:6px;pointer-events:none;max-width:66%}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;width:fit-content;
+ background:rgba(8,13,19,.80);border:1px solid var(--line2);font-size:12px;color:var(--mut);backdrop-filter:blur(8px)}
 .chip b{color:var(--ink);font-weight:600}
-.chip.warn{border-color:#7c3a12;background:rgba(60,22,8,.8);color:#fdba74}
-.hint{position:absolute;right:16px;bottom:14px;z-index:5;font-size:11.5px;color:var(--dim);
-  pointer-events:none;letter-spacing:.02em}
-
-/* ---------- transport ---------- */
-.transport{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:14px 16px;
-  border-top:1px solid var(--line);background:#0c131a}
-button{font:inherit;font-size:13.5px;font-weight:550;color:var(--ink);cursor:pointer;
-  background:#18232e;border:1px solid var(--line2);border-radius:9px;padding:8px 14px;
-  transition:.14s}
+.chip.warn{border-color:#7f1d1d;background:rgba(58,10,16,.86);color:#fda4af}
+.chip.good{border-color:#14532d;background:rgba(6,42,26,.84);color:#86efac}
+.hint{position:absolute;right:15px;bottom:13px;z-index:5;font-size:11px;color:var(--dim);pointer-events:none}
+.transport{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:13px 15px;border-top:1px solid var(--line);background:#0b1118}
+button{font:inherit;font-size:13px;font-weight:550;color:var(--ink);cursor:pointer;background:#18232e;border:1px solid var(--line2);
+ border-radius:9px;padding:8px 13px;transition:.14s}
 button:hover{background:#22303d;border-color:#3b5063}
 button:active{transform:translateY(1px)}
 button.pri{background:linear-gradient(180deg,#17b3a2,#0e8c81);border-color:#12a091;color:#02201d;font-weight:650}
 button.pri:hover{background:linear-gradient(180deg,#1cc4b2,#12a091)}
-button:disabled{opacity:.4;cursor:not-allowed}
 .spacer{flex:1}
-.scrub{padding:0 16px 16px;background:#0c131a;border-top:1px solid var(--line);
-  display:flex;align-items:center;gap:14px}
-input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:5px;border-radius:99px;
-  background:linear-gradient(90deg,var(--clean) var(--p,0%),#1e2a36 var(--p,0%));outline:none}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;
-  background:#eafffb;border:3px solid var(--clean);cursor:grab;box-shadow:0 2px 8px rgba(0,0,0,.5)}
-input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:#eafffb;
-  border:3px solid var(--clean);cursor:grab}
-.mini{font-size:12px;color:var(--dim);white-space:nowrap;font-variant-numeric:tabular-nums}
-
-/* ---------- panel ---------- */
-.panel{display:flex;flex-direction:column;gap:16px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 17px}
-.card h2{margin:0 0 4px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:650}
-.card p{margin:8px 0 0;font-size:13.5px;color:var(--mut)}
-.legend{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
-.legend span{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--mut)}
-.sw{width:15px;height:15px;border-radius:4px}
+.scrub{padding:0 15px 15px;background:#0b1118;border-top:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;min-width:140px;height:5px;border-radius:99px;
+ background:linear-gradient(90deg,var(--clean) var(--p,0%),#1e2a36 var(--p,0%));outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#eafffb;
+ border:3px solid var(--clean);cursor:grab;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#eafffb;border:3px solid var(--clean);cursor:grab}
+.mini{font-size:11.5px;color:var(--dim);white-space:nowrap;font-variant-numeric:tabular-nums}
+.panel{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:15px 16px}
+.card h2{margin:0 0 3px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:650}
+.card p{margin:7px 0 0;font-size:13px;color:var(--mut)}
+.card p b{color:var(--ink);font-weight:600}
+.legend{display:flex;gap:14px;margin-top:11px;flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--mut)}
+.sw{width:14px;height:14px;border-radius:4px}
 .sw.c{background:linear-gradient(150deg,#22c3b0,#0a6b73)}
 .sw.d{background:linear-gradient(150deg,#f0744f,#8d2e1f)}
-ol.steps{margin:10px 0 0;padding:0;list-style:none;counter-reset:s}
-ol.steps li{counter-increment:s;position:relative;padding:9px 0 9px 34px;font-size:13.5px;
-  color:var(--mut);border-bottom:1px dashed var(--line)}
+ol.steps{margin:9px 0 0;padding:0;list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;position:relative;padding:8px 0 8px 32px;font-size:13px;color:var(--mut);border-bottom:1px dashed var(--line)}
 ol.steps li:last-child{border-bottom:0}
-ol.steps li::before{content:counter(s);position:absolute;left:0;top:9px;width:21px;height:21px;
-  border-radius:6px;background:#1b2734;color:var(--ink);display:grid;place-items:center;
-  font-size:11.5px;font-weight:700}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:8px;width:20px;height:20px;border-radius:6px;
+ background:#1b2734;color:var(--ink);display:grid;place-items:center;font-size:11px;font-weight:700}
 ol.steps li b{color:var(--ink);font-weight:600}
-
-table.surf{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
-table.surf th{text-align:left;font-weight:600;color:var(--dim);font-size:10.5px;letter-spacing:.09em;
-  text-transform:uppercase;padding:0 6px 7px}
-table.surf td{padding:7px 6px;border-top:1px solid var(--line);color:var(--mut);
-  font-variant-numeric:tabular-nums}
-table.surf tr{cursor:pointer;transition:.12s}
-table.surf tr:hover td{background:#16202a;color:var(--ink)}
-table.surf tr.on td{background:#1d2b23;color:var(--ink)}
-table.surf tr.done td{color:#5d6f81}
-table.surf tr.done .n{text-decoration:line-through}
-.n{width:20px;height:20px;border-radius:5px;display:inline-grid;place-items:center;
-  font-size:11px;font-weight:700;color:#0b1116}
-.n.c{background:var(--clean)} .n.d{background:var(--dirty)}
-.risk{color:#fdba74}
-.tog{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.tog label{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--mut);
-  background:#151f29;border:1px solid var(--line);border-radius:8px;padding:7px 11px;cursor:pointer;
-  user-select:none}
-.tog input{accent-color:var(--clean);margin:0}
-.note{border-color:#3b2a16;background:linear-gradient(180deg,#1c160e,#12100c)}
+.face-row{display:flex;gap:12px;align-items:flex-start;margin-top:12px}
+.face-row svg{flex:0 0 116px;border-radius:9px;background:#0a1017;border:1px solid var(--line)}
+.mapwrap{flex:1;min-width:0}
+#map{width:100%;height:auto;display:block;border-radius:9px;background:#0a1017;border:1px solid var(--line)}
+.maplab{display:flex;justify-content:space-between;gap:8px;font-size:10.5px;color:var(--dim);margin-top:6px}
+.verdicts{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.vc{padding:4px 8px;border-radius:7px;font-size:10.5px;font-weight:600;background:#141d26;border:1px solid var(--line2);color:var(--mut)}
+.vc.ok{background:#0c2a1d;border-color:#166534;color:#86efac}
+.vc.no{background:#2c0d14;border-color:#7f1d1d;color:#fda4af}
+table.surf{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}
+table.surf th{text-align:left;font-weight:600;color:var(--dim);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:0 4px 6px}
+table.surf td{padding:5px 4px;border-top:1px solid var(--line);color:var(--mut);font-variant-numeric:tabular-nums}
+table.surf tr{cursor:pointer}
+table.surf tr:hover td{background:#18212b}
+table.surf tr.now td{background:#1d2530;color:var(--ink)}
+table.surf tr.done .zn{color:#7d8f9f}
+.n{width:18px;height:18px;border-radius:5px;display:inline-grid;place-items:center;font-size:10px;font-weight:700;color:#0b1116}
+.fc{width:22px;height:18px;border-radius:4px;display:inline-grid;place-items:center;font-size:9.5px;font-weight:700;color:#0b1116}
+.bar{height:5px;border-radius:99px;background:#1b2632;overflow:hidden;min-width:30px}
+.bar i{display:block;height:100%;background:var(--clean);border-radius:99px}
+.bar.tight i{background:var(--gold)}
+.zonepick{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.zc{display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:8px;font-size:11.5px;cursor:pointer;
+ background:#141d26;border:1px solid var(--line);color:var(--mut);user-select:none;transition:.13s}
+.zc:hover{border-color:#3b5063;color:var(--ink)}
+.zc.on{border-color:var(--clean);color:var(--ink);background:#10241f}
+.zc i{width:9px;height:9px;border-radius:3px;display:block}
+.row{display:flex;align-items:center;gap:9px;margin-top:11px;flex-wrap:wrap;font-size:12.5px;color:var(--mut)}
+label.chk{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--mut);background:#141d26;border:1px solid var(--line);
+ border-radius:8px;padding:7px 10px;cursor:pointer;user-select:none}
+label.chk input{accent-color:var(--clean);margin:0}
+select{font:inherit;font-size:12.5px;color:var(--ink);background:#141d26;border:1px solid var(--line2);border-radius:8px;padding:7px 9px}
+.log{margin-top:10px;font-size:11.5px;display:flex;flex-direction:column;gap:4px}
+.log div{padding:5px 8px;border-radius:6px;background:#121a23;color:var(--mut);border-left:2px solid var(--line2)}
+.log div.no{border-left-color:var(--bad);color:#fda4af;background:#1d0e12}
+.log div.ok{border-left-color:#34d399;color:#a7f3d0;background:#0c1f18}
+.sizing{margin-top:11px;display:flex;flex-direction:column;gap:6px}
+.srow{display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--mut);font-variant-numeric:tabular-nums}
+.srow span:first-child{width:104px;flex:0 0 104px}
+.srow .bar{flex:1}
+.srow em{font-style:normal;color:var(--ink);font-weight:600;width:76px;flex:0 0 76px;text-align:right}
+.note{border-color:#3b2a16;background:linear-gradient(180deg,#1a150e,#111009)}
 .note h2{color:#d9a441}
-.note p{color:#c3ae8c}
+.note p{color:#c2ad8b}
+.note b{color:#f0d9ae}
 </style>
 </head>
 <body>
 <div class="app">
-  <header>
-    <h1><span class="dot"></span>The <em>8-Fold</em></h1>
-    <p class="tag">A handkerchief folded in half, in half, in half — so you only ever touch the clean side.</p>
-  </header>
-
-  <main>
-    <!-- ============ STAGE ============ -->
-    <section class="stage-col">
-      <div class="stage" id="stage">
-        <div class="hud" id="hud"></div>
-        <div class="orbit" id="orbit">
-          <div class="mat"></div>
-          <div class="guides" id="guides">
-            <div class="gl gv" style="left:240px"></div>
-            <div class="gl gh" style="top:160px"></div>
-            <div class="gl gv" style="left:360px"></div>
-            <div class="badge" style="left:228px;top:-52px">1</div>
-            <div class="badge" style="left:348px;top:-52px">3</div>
-            <div class="badge" style="left:-52px;top:148px">2</div>
-            <div class="badge" style="left:508px;top:148px">2</div>
-          </div>
-          <div class="cloth" id="cloth"></div>
-        </div>
-        <div class="hint">drag to orbit · scroll to zoom</div>
-      </div>
-
-      <div class="transport">
-        <button class="pri" id="foldAll">Fold all 3</button>
-        <button id="stepF">Fold ①</button>
-        <button id="stepB">Unfold ①</button>
-        <button id="unfoldAll">Unfold</button>
-        <div class="spacer"></div>
-        <button id="run">▶ Run the 8-surface wipe</button>
-        <button id="reset">Reset view</button>
-      </div>
-      <div class="scrub">
-        <span class="mini" id="posLbl">flat</span>
-        <input type="range" id="pos" min="0" max="3" step="0.005" value="0">
-        <span class="mini" id="layerLbl">1 layer</span>
-      </div>
-    </section>
-
-    <!-- ============ PANEL ============ -->
-    <aside class="panel">
-      <div class="card">
-        <h2>The fold</h2>
-        <p>One clean rectangle, three creases, <b style="color:var(--ink)">eight layers</b>. Each layer
-           keeps a fixed teal face up and a fixed coral face down — folding never swaps them.</p>
-        <div class="legend">
-          <span><i class="sw c"></i> clean side — safe to touch</span>
-          <span><i class="sw d"></i> dirty side — never handled</span>
-        </div>
-        <ol class="steps">
-          <li><b>Left half → right half.</b> 2 layers.</li>
-          <li><b>Top half → bottom half.</b> 4 layers.</li>
-          <li><b>Left quarter → right quarter.</b> 8 layers, an eighth of the area.</li>
-        </ol>
-      </div>
-
-      <div class="card">
-        <h2>Working the 8 surfaces</h2>
-        <table class="surf">
-          <thead><tr><th></th><th>Face</th><th>To reach it</th></tr></thead>
-          <tbody id="surfBody"></tbody>
-        </table>
-        <p id="surfNote" style="font-size:12.5px"></p>
-      </div>
-
-      <div class="card">
-        <h2>View</h2>
-        <div class="tog">
-          <label><input type="checkbox" id="tgCrease" checked> crease guides</label>
-          <label><input type="checkbox" id="tgSpin"> slow orbit</label>
-          <label><input type="checkbox" id="tgNum" checked> numbers</label>
-        </div>
-      </div>
-
-      <div class="card note">
-        <h2>The honest bit</h2>
-        <p>The 8-fold is compact and it does keep the dirty side sealed inside — but to get past the
-           first two surfaces you have to <b>open the cloth again</b>, which re-exposes what you already
-           wiped. Watch the <b class="risk">used faces on the table</b> counter climb as you open.
-           A <b>roll fold</b> avoids this entirely: one continuous pass, 100% of the area, nothing
-           ever re-exposed.</p>
-      </div>
-    </aside>
-  </main>
+<header>
+ <h1><span class="sw2"></span>Eight clean surfaces from <em>one square</em></h1>
+ <p class="tag">Two folds, eight faces, one path — wiped once, in order, never twice.</p>
+</header>
+<main>
+ <section class="stage-col">
+  <div class="stage" id="stage">
+   <div class="hud" id="hud"></div>
+   <div class="orbit" id="orbit">
+    <div class="cloth" id="cloth">
+     <div class="ghost" id="ghost"></div>
+     <div class="guides" id="guides">
+      <div class="gl gv"></div><div class="gl gh"></div>
+      <div class="badge" style="left:109px;top:-34px">1</div>
+      <div class="badge" style="left:-34px;top:109px">2</div>
+     </div>
+    </div>
+   </div>
+   <div class="hint">drag to orbit · scroll to zoom · click a face to wipe it</div>
+  </div>
+  <div class="transport">
+   <button class="pri" id="run">▶ Run the 8-surface wipe</button>
+   <button id="next">Step</button><button id="flip">Turn over</button>
+   <button id="foldAll">Fold both</button><button id="flat">Unfold</button>
+   <div class="spacer"></div><button id="reset">Reset</button>
+  </div>
+  <div class="scrub">
+   <span class="mini" id="posLbl">flat</span>
+   <input type="range" id="pos" min="0" max="2" step="0.004" value="0">
+   <span class="mini" id="flipLbl">printed side up</span>
+   <label class="chk" style="margin-left:auto"><input type="checkbox" id="tgCrease" checked> creases</label>
+   <label class="chk"><input type="checkbox" id="tgSpin"> orbit</label>
+  </div>
+ </section>
+ <aside class="panel">
+  <div class="card">
+   <h2>The fold — 2 creases, 4 layers, 8 faces</h2>
+   <p>A square, folded in half and in half again. Every face keeps a fixed <b>printed</b> side and a fixed
+    <b>reverse</b> side; creasing never swaps them.</p>
+   <div class="legend">
+    <span><i class="sw c"></i> printed — 1f 2f 3f 4f</span>
+    <span><i class="sw d"></i> reverse — 1b 2b 3b 4b</span>
+   </div>
+   <ol class="steps">
+    <li><b>Left half onto right half.</b> 2 layers, right-hand rectangle.</li>
+    <li><b>Top half onto bottom half.</b> 4 layers, one quarter of the square.</li>
+    <li><b>Hover.</b> Nothing touches anything, so a wiped face stays wiped. The only transfer left is
+     <b>face against face</b> — and this fold never buries a face you have already used.</li>
+   </ol>
+  </div>
+  <div class="card">
+   <h2>The plan — clean area grows ¼ → ½ → 1</h2>
+   <div class="face-row">
+    <svg id="body" viewBox="0 0 130 212" aria-label="body zones"></svg>
+    <div class="mapwrap">
+     <svg id="map" viewBox="0 0 200 200" aria-label="coverage map"></svg>
+     <div class="maplab"><span id="mapA">—</span><span id="mapB">—</span></div>
+     <div class="verdicts" id="verd"></div>
+    </div>
+   </div>
+  </div>
+  <div class="card">
+   <h2>Surfaces, in order</h2>
+   <table class="surf">
+    <thead><tr><th>#</th><th>Face</th><th>Where</th><th>Wipes</th><th>Fit</th></tr></thead>
+    <tbody id="tbody"></tbody>
+   </table>
+   <p id="planNote" style="font-size:12px"></p>
+  </div>
+  <div class="card">
+   <h2>Handling — the only way to ruin it</h2>
+   <div class="row">
+    <label class="chk"><input type="checkbox" id="rest"> set it down between steps</label>
+    <select id="surfLoad">
+     <option value="">surface is clean</option>
+     <option value="lhand" selected>surface is a used towel (hands)</option>
+     <option value="rhand">shared with someone else</option>
+    </select>
+   </div>
+   <p id="hNote" style="font-size:12px"></p>
+   <h2 style="margin-top:16px">Wipe it yourself</h2>
+   <p style="font-size:12px">Pick a body part, then click any face in the 3-D view. The page tells you the
+    moment you break the path.</p>
+   <div class="zonepick" id="zpick"></div>
+   <div class="log" id="log"></div>
+  </div>
+  <div class="card">
+   <h2>How big a cloth do you need?</h2>
+   <div class="row">
+    <select id="preset">
+     <option value="face">Face only (8 targets)</option>
+     <option value="facehands" selected>Face + both hands</option>
+     <option value="body">Face + hands + forearms</option>
+    </select>
+    <select id="size">
+     <option value="15">15 cm square</option>
+     <option value="20">20 cm square</option>
+     <option value="30" selected>30 cm square</option>
+     <option value="45">45 cm bandana</option>
+    </select>
+   </div>
+   <div class="sizing" id="sizing"></div>
+  </div>
+  <div class="card note">
+   <h2>The honest bit</h2>
+   <p><b>Hovering is not a detail, it is the mechanism.</b> Set the packet down and the face you already
+    wiped picks up whatever was on that surface — switch the toggle above and watch step 2 go red.</p>
+   <p><b>You must turn the packet over once</b>, while it is still 4 layers thick, to reach the single face
+    on its underside. That one flip, pinched along a crease in mid-air, is the tightest moment in the
+    whole procedure.</p>
+   <p><b>And it is wasteful on purpose.</b> A 30 cm square gives 225 cm² per face against a 32 cm² cheek.
+    You are buying a guarantee, not efficiency — a 15 cm pocket square covers a whole face in eight
+    never-reused strokes.</p>
+  </div>
+ </aside>
+</main>
 </div>
-
 <script>
 "use strict";
-/* ============================== MATH ============================== */
-const CW=120, CH=160, T=0.9;                 // panel size + layer thickness
-const I3=()=>[1,0,0, 0,1,0, 0,0,1];
+/* ═════ 1. MATRIX MATH ═════ */
+const PN=120, T=1;
+const I3=()=>[1,0,0,0,1,0,0,0,1];
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 function mul(A,B){const C=new Array(9);
-  for(let r=0;r<3;r++)for(let c=0;c<3;c++)
-    C[r*3+c]=A[r*3]*B[c]+A[r*3+1]*B[3+c]+A[r*3+2]*B[6+c];
-  return C;}
-const rotY=a=>{const c=Math.cos(a),s=Math.sin(a);return [c,0,s, 0,1,0, -s,0,c];};
-const rotX=a=>{const c=Math.cos(a),s=Math.sin(a);return [1,0,0, 0,c,-s, 0,s,c];};
-const app3=(M,v)=>[M[0]*v[0]+M[1]*v[1]+M[2]*v[2],
-                    M[3]*v[0]+M[4]*v[1]+M[5]*v[2],
-                    M[6]*v[0]+M[7]*v[1]+M[8]*v[2]];
-const center=c=>[c.p[0]+(c.M[0]*CW/2+c.M[1]*CH/2),
-                 c.p[1]+(c.M[3]*CW/2+c.M[4]*CH/2),
-                 c.p[2]+(c.M[6]*CW/2+c.M[7]*CH/2)];
+ for(let r=0;r<3;r++)for(let c=0;c<3;c++)C[r*3+c]=A[r*3]*B[c]+A[r*3+1]*B[3+c]+A[r*3+2]*B[6+c];
+ return C;}
+const rotY=a=>{const c=Math.cos(a),s=Math.sin(a);return [c,0,s,0,1,0,-s,0,c];};
+const rotX=a=>{const c=Math.cos(a),s=Math.sin(a);return [1,0,0,0,c,-s,0,s,c];};
+const app3=(M,v)=>[M[0]*v[0]+M[1]*v[1]+M[2]*v[2],M[3]*v[0]+M[4]*v[1]+M[5]*v[2],M[6]*v[0]+M[7]*v[1]+M[8]*v[2]];
+const center=c=>[c.p[0]+(c.M[0]*PN/2+c.M[1]*PN/2),c.p[1]+(c.M[3]*PN/2+c.M[4]*PN/2),c.p[2]+(c.M[6]*PN/2+c.M[7]*PN/2)];
 
-/* ========================== FOLD MODEL ============================ */
-const FOLDS=[
-  {axis:'y', c:2*CW, name:'Fold 1 — left half onto right half'},
-  {axis:'x', c:1*CH, name:'Fold 2 — top half onto bottom half'},
-  {axis:'y', c:3*CW, name:'Fold 3 — left quarter onto right quarter'},
-];
-
-/* pos: 0..3 continuous.  flip: 0..2 (1 = packet turned over, 2 = identity again) */
-function simulate(pos, flip){
+/* ═════ 2. FOLD SIMULATOR ═════
+   4 panels: 1=top-left 2=top-right 3=bottom-left 4=bottom-right.
+   Each crease is one rigid 180° rotation about a hinge whose height comes
+   from the live layer stack, so flaps land exactly on top of what is there. */
+const FOLDS=[{axis:'y',c:PN,name:'crease ① — left half onto right half'},
+             {axis:'x',c:PN,name:'crease ② — top half onto bottom half'}];
+function simulate(pos,flip){
   const cells=[];
-  for(let i=0;i<4;i++) for(let j=0;j<2;j++)
-    cells.push({id:i*2+j+1, i, j, M:I3(), p:[i*CW, j*CH, 0]});
-
-  for(let k=0;k<3;k++){
+  for(let i=0;i<2;i++)for(let j=0;j<2;j++)cells.push({id:i*2+j+1,i,j,M:I3(),p:[i*PN,j*PN,0]});
+  for(let k=0;k<2;k++){
     const u=clamp(pos-k,0,1);
     if(u<=1e-6) break;
     const f=FOLDS[k];
-    /* moving set is read from the PRE-fold state, which is identical every frame
-       (all earlier creases are fully closed by the time crease k animates)   */
-    const info=cells.map(c=>({c, ctr:center(c)}));
-    const mv=info.filter(o=> f.axis==='y' ? o.ctr[0] < f.c-0.01 : o.ctr[1] < f.c-0.01);
-    const st=info.filter(o=> mv.indexOf(o)<0);
+    const info=cells.map(c=>({c,ctr:center(c)}));
+    const mv=info.filter(o=>f.axis==='y'?o.ctr[0]<f.c-0.01:o.ctr[1]<f.c-0.01);
+    const st=info.filter(o=>!mv.includes(o));
     if(!mv.length) break;
-
-    /* hinge height: flap must land exactly on top of the stationary stack */
     const maxM=Math.max(...mv.map(o=>o.ctr[2]));
     const maxS=st.length?Math.max(...st.map(o=>o.ctr[2])):0;
     const h=(maxM+maxS+T)/2;
-
-    const R = f.axis==='y' ? rotY( Math.PI*u) : rotX(-Math.PI*u);
+    const R=f.axis==='y'?rotY(Math.PI*u):rotX(-Math.PI*u);
     for(const o of mv){
-      const q = f.axis==='y' ? [f.c, o.ctr[1], h] : [o.ctr[0], f.c, h];
-      const Rp=app3(R,o.c.p), Rq=app3(R,q);
-      o.c.M = mul(R,o.c.M);
-      o.c.p = [Rp[0]+q[0]-Rq[0], Rp[1]+q[1]-Rq[1], Rp[2]+q[2]-Rq[2]];
+      const q=f.axis==='y'?[f.c,o.ctr[1],h]:[o.ctr[0],f.c,h];
+      const Rp=app3(R,o.c.p),Rq=app3(R,q);
+      o.c.M=mul(R,o.c.M);
+      o.c.p=[Rp[0]+q[0]-Rq[0],Rp[1]+q[1]-Rq[1],Rp[2]+q[2]-Rq[2]];
     }
   }
-
-  if(flip>1e-6){                               // rigid 180° tumble of the whole cloth
+  if(flip>1e-6){
     const ys=cells.map(c=>center(c)[1]);
     const q=[0,(Math.min(...ys)+Math.max(...ys))/2,0];
-    const R=rotX(-Math.PI*flip), Rq=app3(R,q);
-    for(const c of cells){
-      const Rp=app3(R,c.p);
-      c.M=mul(R,c.M);
-      c.p=[Rp[0]+q[0]-Rq[0], Rp[1]+q[1]-Rq[1], Rp[2]+q[2]-Rq[2]];
-    }
+    const R=rotX(-Math.PI*flip),Rq=app3(R,q);
+    for(const c of cells){const Rp=app3(R,c.p);c.M=mul(R,c.M);
+      c.p=[Rp[0]+q[0]-Rq[0],Rp[1]+q[1]-Rq[1],Rp[2]+q[2]-Rq[2]];}
   }
   return cells;
 }
+const keyOf=c=>Math.round(c[0]/PN)+','+Math.round(c[1]/PN);
 
-const faceId=(cell,side)=>cell+(side==='front'?'f':'b');
-const keyOf=ctr=>Math.round(ctr[0]/CW)+','+Math.round(ctr[1]/CH);
-
-function stackFaces(k,flip,which){            // 'top' | 'bottom'
-  const cells=simulate(k,flip), g=new Map();
-  for(const c of cells){
-    const ctr=center(c), key=keyOf(ctr);
-    if(!g.has(key)) g.set(key,[]);
-    g.get(key).push({c, z:ctr[2]});
-  }
+/* which faces can you physically touch at a given pose? */
+function stateInfo(k,flip){
+  const cells=simulate(k,flip),g=new Map();
+  for(const c of cells){const ctr=center(c),key=keyOf(ctr);
+    if(!g.has(key))g.set(key,[]);g.get(key).push(c);}
   const out=[];
   for(const [key,arr] of g){
-    arr.sort((a,b)=>b.z-a.z);
-    const pick = which==='top' ? arr[0].c : arr[arr.length-1].c;
-    const up = pick.M[8] > 0;                 // local +z (front) points at viewer
-    const side = which==='top' ? (up?'front':'back') : (up?'back':'front');
-    out.push({key, cell:pick.id, side});
+    arr.sort((a,b)=>center(a)[2]-center(b)[2]);
+    const up=c=>c.M[8]>0?'f':'b', dn=c=>up(c)==='f'?'b':'f';
+    const pairs=[];
+    for(let i=0;i<arr.length-1;i++)pairs.push(arr[i].id+up(arr[i])+'|'+arr[i+1].id+dn(arr[i+1]));
+    out.push({key,n:arr.length,layers:arr.map(c=>c.id+up(c)),
+      top:arr[arr.length-1].id+up(arr[arr.length-1]),bot:arr[0].id+dn(arr[0]),pairs});
   }
-  out.sort((a,b)=>{const A=a.key.split(',').map(Number),B=b.key.split(',').map(Number);
-                   return A[1]-B[1]||A[0]-B[0];});
-  return out;
+  const ord=s=>s.split(',').map(Number);
+  return out.sort((a,b)=>ord(a.key)[1]-ord(b.key)[1]||ord(a.key)[0]-ord(b.key)[0]);
 }
+const whereOf=(k,flip,face)=>{for(const g of stateInfo(k,flip))if(g.top===face||g.bot===face)return g.key;return null;};
 
-/* ============================== BUILD DOM ========================= */
-const cloth=document.getElementById('cloth');
-const cells=[];
-for(let i=0;i<4;i++) for(let j=0;j<2;j++){
-  const id=i*2+j+1;
-  const el=document.createElement('div');
+/* ═════ 3. DOM ═════ */
+const cloth=document.getElementById('cloth'),stage=document.getElementById('stage');
+const orbit=document.getElementById('orbit'),hud=document.getElementById('hud');
+const cells={};
+for(let i=0;i<2;i++)for(let j=0;j<2;j++){
+  const id=i*2+j+1,el=document.createElement('div');
   el.className='cell';
-  el.innerHTML=`<div class="f f-front" data-side="front"><b>${id}</b><i>clean</i></div>
-                <div class="f f-back"  data-side="back"><b>${id}</b><i>underside</i></div>`;
+  el.innerHTML=['f','b'].map(s=>
+   `<div class="f f-${s==='f'?'front':'back'}" data-face="${id}${s}"><div class="zname"></div><div class="wipe"></div>`+
+   `<b>${id}</b><i>${s==='f'?'printed':'reverse'}</i><div class="load"></div></div>`).join('');
   cloth.appendChild(el);
-  cells.push({id, el, front:el.querySelector('.f-front'), back:el.querySelector('.f-back')});
+  cells[id+'f']={el,f:el.querySelector('.f-front')};
+  cells[id+'b']={el,f:el.querySelector('.f-back')};
 }
-const byId=Object.fromEntries(cells.map(c=>[c.id,c]));
-
-/* ============================== STATE ============================= */
-let pos=0, posT=0, flip=0, flipT=0, spin=false;
-let yaw=-20, pitch=54, scale=1;
-let used=new Set(), hiFaces=[], stepIdx=-1, runTimer=null;
-
-const orbit=document.getElementById('orbit'), stage=document.getElementById('stage');
-const posEl=document.getElementById('pos'), hud=document.getElementById('hud');
-const guides=document.getElementById('guides');
-const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-function orbitMatrix(){
-  const s=scale, m=mul(rotX(pitch*Math.PI/180), rotY(yaw*Math.PI/180));
-  return [m[0]*s,m[3]*s,m[6]*s,0, m[1]*s,m[4]*s,m[7]*s,0, m[2]*s,m[5]*s,m[8]*s,0, 0,0,0,1];
-}
-/* normals → view space so panels darken as they tip away from you */
-const Nm=mul(rotX(-pitch*Math.PI/180), rotY(-yaw*Math.PI/180));
-const shade=n=>clamp((Nm[6]*n[0]+Nm[7]*n[1]+Nm[8]*n[2]),0,1);
-
-/* ============================== RENDER ============================ */
-function render(){
-  orbit.style.transform='matrix3d('+orbitMatrix().join(',')+')';
-  const st=simulate(pos,flip);
-  for(let n=0;n<st.length;n++){
-    const c=st[n], ui=byId[c.id], M=c.M;
-    ui.el.style.transform=
-      `matrix3d(${M[0]},${M[3]},${M[6]},0, ${M[1]},${M[4]},${M[7]},0, ${M[2]},${M[5]},${M[8]},0, ${c.p[0]},${c.p[1]},${c.p[2]},1)`;
-    const lit=shade([M[2],M[5],M[8]]);        // >0 front toward viewer
-    const l=lit>0?lit:-lit;
-    ui.el.style.setProperty('--sh',(0.34-0.30*l).toFixed(3));
-    ui.el.style.setProperty('--hi',(0.02+0.16*l).toFixed(3));
-  }
-  paintFaces();
-  paintHud();
-  posEl.style.setProperty('--p',(pos/3*100).toFixed(1)+'%');
-}
-
-/* ============================ FACE STATE ========================== */
-function faceEl(cell,side){ return side==='front'?byId[cell].front:byId[cell].back; }
-function paintFaces(){
-  cells.forEach(c=>{
-    c.front.classList.toggle('used', used.has(faceId(c.id,'front')));
-    c.back .classList.toggle('used', used.has(faceId(c.id,'back')));
-    c.front.classList.toggle('hi', hiFaces.includes(faceId(c.id,'front')));
-    c.back .classList.toggle('hi', hiFaces.includes(faceId(c.id,'back')));
-  });
-}
-function paintHud(){
-  const k=Math.min(3,Math.floor(pos+1e-4)), u=clamp(pos-k,0,1);
-  const layers=pos<1e-4?1:pos<2-1e-4?2:pos<3-1e-4?4:8;
-  let title;
-  if(pos<1e-4)      title='<b>Flat</b> — 8 panels, 1 layer';
-  else if(pos>2.999) title='<b>Folded</b> — 8 layers';
-  else if(u>1e-4)    title=`<b>${FOLDS[k].name}</b> — ${Math.round(u*100)}%`;
-  else              title=`<b>${FOLDS[k-1].name}</b> — done`;
-  const down=stackFaces(k>2?3:Math.round(pos),Math.round(flip),'bottom')
-              .filter(f=>used.has(faceId(f.cell,f.side))).length;
-  hud.innerHTML=
-    `<div class="chip">${title}</div>`+
-    (flip>0.02?`<div class="chip">packet turned over</div>`:'')+
-    (down>0?`<div class="chip warn"><b>${down}</b> used surface${down>1?'s':''} lying on the table</div>`:'');
-  document.getElementById('posLbl').textContent=pos<1e-4?'flat':pos>2.999?'8 layers':(k+1)+' crease';
-  document.getElementById('layerLbl').textContent=layers+' layer'+(layers>1?'s':'');
-}
-
-/* ============================== PLAN ============================== */
-const STEPS=[
-  {k:3,f:0,act:'Wipe the top of the packet'},
-  {k:3,f:1,act:'Turn the packet over'},
-  {k:2,f:2,act:'Open crease ③'},
-  {k:1,f:2,act:'Open crease ②'},
-  {k:0,f:2,act:'Open crease ① — flat again'},
-];
-function buildPlan(){
-  used=new Set(); const rows=[];
-  STEPS.forEach((s,i)=>{
-    const top=stackFaces(s.k,s.f,'top');
-    const fresh=top.filter(f=>!used.has(faceId(f.cell,f.side)));
-    const take = i===STEPS.length-1 ? fresh.slice(0,1) : fresh;
-    take.forEach(f=>used.add(faceId(f.cell,f.side)));
-    const down=stackFaces(s.k,s.f,'bottom').filter(f=>used.has(faceId(f.cell,f.side))).length;
-    rows.push({...s, i, faces:take, down,
-               risk:top.filter(f=>used.has(faceId(f.cell,f.side)) && !take.includes(f)).length});
-  });
-  return rows;
-}
-const PLAN=buildPlan();
-
-/* render the surface table */
-const tbody=document.getElementById('surfBody');
-PLAN.forEach(r=>{
-  r.faces.forEach((f,j)=>{
-    const tr=document.createElement('tr');
-    tr.dataset.step=r.i; tr.dataset.face=faceId(f.cell,f.side);
-    tr.innerHTML=`<td><span class="n ${f.side==='front'?'c':'d'}">${f.cell}</span></td>
-      <td>${f.side==='front'?'clean side':'underside'}${r.faces.length>1?` · face ${j+1}`:''}</td>
-      <td>${j===0?r.act:'—'}</td>`;
-    tbody.appendChild(tr);
-  });
-});
-function markUsedRows(){
-  [...tbody.children].forEach(tr=>{
-    tr.classList.toggle('done', used.has(tr.dataset.face));
-    tr.classList.toggle('on', hiFaces.includes(tr.dataset.face));
-  });
-}
-
-function gotoStep(i){
-  stepIdx=i; const s=PLAN[i];
-  posT=s.k; flipT=s.f;
-  hiFaces=s.faces.map(f=>faceId(f.cell,f.side));
-  s.faces.forEach(f=>used.add(faceId(f.cell,f.side)));
-  markUsedRows();
-  clearTimeout(runTimer);
-}
-function runAll(){
-  used=new Set(); markUsedRows(); stepIdx=-1;
-  let i=0;
-  const next=()=>{
-    if(i>=PLAN.length) return;
-    gotoStep(i++);
-    runTimer=setTimeout(next, 2600);
-  };
-  next();
-}
-
-/* ============================ CONTROLS ============================ */
-const go=p=>{ posT=clamp(p,0,3); };
-document.getElementById('foldAll').onclick   =()=>go(3);
-document.getElementById('unfoldAll').onclick =()=>go(posT>0.05?0:3);
-document.getElementById('stepF').onclick    =()=>go(Math.min(3,Math.ceil(posT-1e-6)+1));
-document.getElementById('stepB').onclick    =()=>go(posT<3?Math.max(0,Math.floor(posT+1e-6)-1):2);
-document.getElementById('run').onclick       =runAll;
-document.getElementById('reset').onclick     =()=>{yaw=-20;pitch=54;scale=1;};
-posEl.oninput =e=>{ posT=pos=+e.target.value; flipT=Math.round(flipT); };
-document.getElementById('tgCrease').onchange=e=>cloth.classList.toggle('show-creases',e.target.checked);
-document.getElementById('tgNum').onchange   =e=>cloth.classList.toggle('hide-nums',!e.target.checked);
-document.getElementById('tgSpin').onchange  =e=>{spin=e.target.checked;};
-tbody.onclick=e=>{
-  const tr=e.target.closest('tr'); if(!tr) return;
-  used=new Set([...used].filter(f=>f!==tr.dataset.face));
-  gotoStep(+tr.dataset.step);
-};
 cloth.classList.add('show-creases');
 
-/* ============================== LOOP ============================== */
-let last=performance.now();
-function tick(now){
-  const dt=Math.min(50,now-last); last=now;
-  if(spin) yaw+=dt*0.012;
-  const k=reduce?1:1-Math.pow(0.0016, dt/1000);
-  pos+=(posT-pos)*k; flip+=(flipT-flip)*k;
-  if(Math.abs(posT-pos)<0.0006) pos=posT;
-  if(Math.abs(flipT-flip)<0.0006) flip=flipT;
-  render(); markUsedRows();
-  requestAnimationFrame(tick);
+/* ═════ 4. ZONES & PROTOCOL ═════ */
+const Z={
+ forehead:{n:'Forehead',a:55,c:'#34d399'},lcheek:{n:'Left cheek',a:32,c:'#f472b6'},
+ rcheek:{n:'Right cheek',a:32,c:'#fb923c'},nose:{n:'Nose',a:18,c:'#facc15'},
+ chin:{n:'Chin',a:16,c:'#a3e635'},lip:{n:'Upper lip',a:9,c:'#fb7185'},
+ lear:{n:'Left ear',a:12,c:'#c084fc'},rear:{n:'Right ear',a:12,c:'#818cf8'},
+ neck:{n:'Neck',a:55,c:'#22d3ee'},lhand:{n:'Left hand',a:170,c:'#60a5fa'},
+ rhand:{n:'Right hand',a:170,c:'#a78bfa'},larm:{n:'Left forearm',a:120,c:'#2dd4bf'},
+ rarm:{n:'Right forearm',a:120,c:'#f0abfc'}};
+const PRESETS={
+ face:['lcheek','rcheek','nose','chin','forehead','lip','lear','rear'],
+ facehands:['lcheek','rcheek','nose','chin','forehead','neck','lhand','rhand'],
+ body:['lcheek','rcheek','nose','chin','neck','forehead','larm','rhand']};
+/* poses verified against the simulator: every face below is reachable & unused at that pose */
+const POSE=[
+ {k:2,f:0,use:'3b',act:'Fold both creases. Wipe the top face.'},
+ {k:2,f:1,use:'4b',act:'Turn the packet over in mid-air. Wipe the underside.'},
+ {k:1,f:1,use:null,act:'Open crease ② while it is still face-down.'},
+ {k:1,f:0,use:'1b',act:'Turn it back — only 2 layers thick now, much easier.'},
+ {k:1,f:0,use:'2b',act:'Second face of the half-square.'},
+ {k:0,f:0,use:'1f',act:'Unfold completely. Four printed faces left.'},
+ {k:0,f:0,use:'2f',act:''},{k:0,f:0,use:'3f',act:''},{k:0,f:0,use:'4f',act:''}];
+const ALL8=['1f','1b','2f','2b','3f','3b','4f','4b'];
+const QNAME={'1,1':'top-left','2,1':'top-right','1,2':'bottom-left','2,2':'bottom-right'};
+const QXY={'1,1':[6,6],'2,1':[104,6],'1,2':[6,104],'2,2':[104,104]};
+let preset='facehands',size=30,zonePick='lcheek',poseIdx=-1,hi=null;
+
+/* ═════ 5. CONTAMINATION ENGINE ═════
+   A face carries a set of body-zone loads. Loads move by exactly two routes:
+   rubbing (a wipe) and pressing (face-against-face, or the surface below).   */
+const loads={},order=[],log=[];
+let surface=new Set(),resting=false,stats={reuse:0,cross:0,press:0,pressed:0};
+for(const f of ALL8)loads[f]=new Set();
+function say(t,c){log.push([t,c||'']);if(log.length>40)log.shift();renderLog();}
+function pick(face,zone,src){loads[face].add(zone);stats.cross++;say(face+' picked up <b>'+Z[zone].n.toLowerCase()+'</b> '+src,'no');}
+function wipe(face,zone,quiet){
+  const before=[...loads[face]];
+  if(before.length){stats.reuse++;
+    say('<b>Path reuse.</b> '+face+' already carried '+before.map(z=>Z[z].n.toLowerCase()).join(' + ')+' — now adding '+Z[zone].n.toLowerCase()+'.','no');}
+  const foreign=before.filter(z=>z!==zone);
+  if(foreign.length){stats.cross++;
+    say('<b>Cross-contamination.</b> '+face+' carried '+foreign.map(z=>Z[z].n.toLowerCase()).join(', ')+' into '+Z[zone].n.toLowerCase()+'.','no');}
+  if(!quiet&&!before.length)say(face+' wiped with <b>'+Z[zone].n.toLowerCase()+'</b> — first and only time.','ok');
+  loads[face].add(zone);
+  if(!order.includes(face))order.push(face);
+  paintFaces();renderVerd();
+}
+function resetEngine(){
+  for(const f of ALL8)loads[f]=new Set();
+  order.length=0;log.length=0;
+  stats={reuse:0,cross:0,press:0,pressed:0};
+  surface=new Set(surfSel.value?[surfSel.value]:[]);
+  lastContacts=new Set();renderLog();renderVerd();paintFaces();
+}
+let lastContacts=new Set();
+function contactPass(k,flip){
+  const now=new Set();
+  for(const g of stateInfo(k,flip))for(const p of g.pairs)now.add(p);
+  for(const p of now){
+    if(lastContacts.has(p))continue;
+    const[a,b]=p.split('|'),la=loads[a].size>0,lb=loads[b].size>0;
+    if(la&&!lb){stats.press++;pick(b,[...loads[a]][0],'by pressing against the already-wiped face '+a+'.');}
+    else if(lb&&!la){stats.press++;pick(a,[...loads[b]][0],'by pressing against the already-wiped face '+b+'.');}
+    else if(la&&lb)stats.pressed++;
+  }
+  lastContacts=now;
+  if(resting){
+    for(const g of stateInfo(k,flip)){
+      const b=g.bot;
+      for(const z of [...surface])if(!loads[b].has(z))
+        pick(b,z,'because the packet was set down on a surface that was not clean.');
+      for(const z of loads[b])surface.add(z);
+    }
+    renderVerd();paintFaces();
+  }
 }
 
-/* ============================== ORBIT ============================= */
+/* ═════ 6. PLAN / TABLE / MAP / BODY ═════ */
+let plan=[];
+function buildPlan(){
+  let n=0;
+  plan=POSE.map((s,i)=>{const o={...s,i};
+    if(s.use){o.no=++n;o.zone=PRESETS[preset][n-1];o.key=whereOf(s.k,s.f,s.use);}
+    return o;});
+  const tb=document.getElementById('tbody');tb.innerHTML='';
+  for(const s of plan){
+    if(!s.use)continue;
+    const tr=document.createElement('tr');tr.dataset.face=s.use;
+    tr.innerHTML='<td><span class="n" style="background:'+Z[s.zone].c+'">'+s.no+'</span></td>'+
+     '<td><span class="fc" style="background:'+(s.use[1]==='f'?'#22c3b0':'#f0744f')+'">'+s.use+'</span></td>'+
+     '<td>'+(QNAME[s.key]||'—')+'</td><td class="zn">'+Z[s.zone].n+'</td>'+
+     '<td><div class="bar" data-fit="'+s.zone+'"><i style="width:0%"></i></div></td>';
+    tb.appendChild(tr);
+  }
+  document.getElementById('planNote').innerHTML='Click a row to jump to it. The bar is <b>how much of that '+
+   'face the body part needs</b> — gold means the target nearly fills the face. The rest is the price of the guarantee.';
+  buildMap();fitBars();
+}
+function buildMap(){
+  let s='<rect x="2" y="2" width="196" height="196" rx="4" fill="none" stroke="#2b3b4b" stroke-dasharray="3 4"/>';
+  for(const k in QXY){const[x,y]=QXY[k];
+    s+='<rect x="'+x+'" y="'+y+'" width="90" height="90" rx="4" fill="#0f1820" stroke="#1e2a36"/>';}
+  s+='<rect id="cleanbox" x="104" y="104" width="90" height="90" rx="4" fill="rgba(20,184,166,.16)" stroke="#14b8a6" stroke-width="2"/>';
+  document.getElementById('map').innerHTML=s;
+}
+function paintMap(upto){
+  const box=document.getElementById('cleanbox');if(!box)return;
+  const st=upto<0?0:(upto<2?0:upto<5?1:2);
+  const R=[[104,104,90,90],[104,6,90,188],[6,6,188,188]][st];
+  box.setAttribute('x',R[0]);box.setAttribute('y',R[1]);
+  box.setAttribute('width',R[2]);box.setAttribute('height',R[3]);
+  document.getElementById('mapA').textContent='clean area exposed: '+['¼','½','1'][st];
+  const m=document.getElementById('map');
+  m.querySelectorAll('circle,text.n2').forEach(e=>e.remove());
+  const per={},NS='http://www.w3.org/2000/svg';let n=0;
+  for(const s of plan)if(s.use&&s.i<=upto)(per[s.key]=per[s.key]||[]).push(s);
+  for(const k in per)per[k].forEach((s,i)=>{
+    const[x,y]=QXY[k],cx=x+23+(i%2)*44,cy=y+23+Math.floor(i/2)*44;
+    const c=document.createElementNS(NS,'circle');
+    c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',12);
+    c.setAttribute('fill',Z[s.zone].c);c.setAttribute('stroke','#070a0f');c.setAttribute('stroke-width','2');
+    m.appendChild(c);
+    const t=document.createElementNS(NS,'text');t.setAttribute('class','n2');
+    t.setAttribute('x',cx);t.setAttribute('y',cy+4);t.setAttribute('text-anchor','middle');
+    t.setAttribute('font-size','11');t.setAttribute('font-weight','700');t.setAttribute('fill','#070a0f');
+    t.textContent=s.no;m.appendChild(t);n++;
+  });
+  document.getElementById('mapB').textContent=n+' of 8 surfaces used';
+}
+const SHAPE={forehead:['rect',45,18,40,19,8],nose:['ellipse',65,56,5,10],lip:['rect',57,72,16,6,3],
+ chin:['ellipse',65,87,12,9],neck:['rect',56,82,18,17,3],lcheek:['ellipse',51,57,11,10],
+ rcheek:['ellipse',79,57,11,10],lear:['circle',34,52,4.5],rear:['circle',96,52,4.5],
+ larm:['rect',16,120,15,56,7],rarm:['rect',99,120,15,56,7],
+ lhand:['ellipse',23,188,10,12],rhand:['ellipse',107,188,10,12]};
+function buildBody(){
+  let s='<ellipse cx="65" cy="46" rx="30" ry="37" fill="#0f1820" stroke="#2b3b4b"/>';
+  for(const k in SHAPE){const[t,x,y,w,h,r]=SHAPE[k],inP=PRESETS[preset].includes(k);
+    const geo=t==='rect'?'x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'"'
+      :(t==='circle'?'r="'+w+'"':'rx="'+w+'" ry="'+h+'"');
+    s+='<'+t+' class="bz" data-z="'+k+'" cx="'+x+'" cy="'+y+'" '+geo+' fill="'+(inP?Z[k].c:'#182029')+
+       '" fill-opacity="'+(inP?.20:.5)+'" stroke="'+(inP?Z[k].c:'#2b3b4b')+'" stroke-width="1.4"/>';}
+  document.getElementById('body').innerHTML=s;
+}
+function markBody(zone){
+  document.querySelectorAll('#body .bz').forEach(e=>{
+    const on=e.dataset.z===zone;
+    e.setAttribute('fill-opacity',on?.95:.20);e.setAttribute('stroke-width',on?2.6:1.4);
+  });
+}
+function fitBars(){
+  const per=Math.pow(size/2,2);
+  document.querySelectorAll('#tbody .bar').forEach(b=>{
+    const need=Z[b.dataset.fit].a,pct=clamp(need/per*100,4,100);
+    b.classList.toggle('tight',need/per>.7);b.firstElementChild.style.width=pct+'%';});
+}
+function sizing(){
+  const zs=PRESETS[preset],per=Math.pow(size/2,2),cap=2*size*size;
+  const need=zs.reduce((s,z)=>s+Z[z].a,0),big=Math.max.apply(null,zs.map(z=>Z[z].a));
+  const pc=(v,mx)=>clamp(v/mx*100,3,100);
+  document.getElementById('sizing').innerHTML=
+   '<div class="srow"><span>surface per face</span><div class="bar"><i style="width:'+pc(per,220)+'%"></i></div><em>'+per.toFixed(0)+' cm²</em></div>'+
+   '<div class="srow"><span>largest target</span><div class="bar'+(big/per>.7?' tight':'')+'"><i style="width:'+pc(big,per)+'%;background:'+(big/per>.7?'var(--gold)':'var(--clean)')+'"></i></div><em>'+big+' cm²</em></div>'+
+   '<div class="srow"><span>total body area</span><div class="bar"><i style="width:'+pc(need,cap)+'%"></i></div><em>'+need+' cm²</em></div>'+
+   '<div class="srow"><span>cloth wasted</span><div class="bar"><i style="width:'+(1-need/cap)*100+'%;background:#ef6a4c"></i></div><em>'+Math.round((1-need/cap)*100)+'%</em></div>'+
+   '<p style="font-size:12.5px;margin:5px 0 0">'+(per>=big
+     ? '<b style="color:#86efac">'+size+' cm works.</b> Each face is '+per.toFixed(0)+' cm²; the biggest target is '+big+' cm².'
+     : '<b style="color:#fda4af">'+size+' cm is too small.</b> The biggest target ('+big+' cm²) needs a face of at least '+big+' cm².')+
+   ' The binding constraint is the <b>largest single target</b>, so you need a side of at least '+
+   '<b style="color:#fbbf24">'+big+' cm² → '+size+' cm</b> for these eight. Going bigger buys comfort, not safety.</p>';
+}
+function zonePicker(){
+  document.getElementById('zpick').innerHTML=PRESETS[preset].map(k=>
+   '<div class="zc'+(k===zonePick?' on':'')+'" data-z="'+k+'"><i style="background:'+Z[k].c+'"></i>'+Z[k].n+'</div>').join('');
+}
+
+/* ═════ 7. RENDER ═════ */
+let pos=0,posT=0,flip=0,flipT=0,spin=false,yaw=-18,pitch=56,scale=1;
+const orbitM=()=>{const s=scale,m=mul(rotX(pitch*Math.PI/180),rotY(yaw*Math.PI/180));
+ return [m[0]*s,m[3]*s,m[6]*s,0,m[1]*s,m[4]*s,m[7]*s,0,m[2]*s,m[5]*s,m[8]*s,0,0,0,0,1];};
+const Nm=mul(rotX(-pitch*Math.PI/180),rotY(-yaw*Math.PI/180));
+const shade=n=>clamp(Nm[6]*n[0]+Nm[7]*n[1]+Nm[8]*n[2],0,1);
+function render(){
+  orbit.style.transform='matrix3d('+orbitM().join(',')+')';
+  for(const c of simulate(pos,flip)){
+    const M=c.M,tr='matrix3d('+M[0]+','+M[3]+','+M[6]+',0,'+M[1]+','+M[4]+','+M[7]+',0,'+M[2]+','+M[5]+','+M[8]+',0,'+c.p[0]+','+c.p[1]+','+c.p[2]+',1)';
+    for(const side of ['f','b']){
+      const u=cells[c.id+side];u.el.style.transform=tr;
+      const l=Math.abs(shade([M[2],M[5],M[8]])*(side==='b'?-1:1));
+      u.el.style.setProperty('--sh',(0.34-0.30*l).toFixed(3));
+      u.el.style.setProperty('--hi',(0.02+0.15*l).toFixed(3));
+    }
+  }
+  paintFaces();renderHud();
+  const pe=document.getElementById('pos');
+  pe.style.setProperty('--p',(pos/2*100).toFixed(1)+'%');
+  document.getElementById('posLbl').textContent=pos<.004?'flat':pos>1.996?'4 layers':'folding…';
+  document.getElementById('flipLbl').textContent=flip>.5?'reverse side up':'printed side up';
+  const g=1-clamp(pos/1.4,0,1);
+  document.getElementById('ghost').style.opacity=(g*.9+.1).toFixed(2);
+  document.getElementById('guides').style.opacity=g.toFixed(2);
+}
+function paintFaces(){
+  for(const f of ALL8){
+    const u=cells[f],L=loads[f],l=u.f.querySelector('.load');
+    u.f.classList.toggle('used',L.size>0);
+    u.f.classList.toggle('hasload',L.size>0);
+    u.f.classList.toggle('hi',hi===f);
+    u.f.classList.toggle('spoil',L.size>1);
+    if(L.size){l.style.background=Z[[...L][0]].c;
+      l.textContent=L.size>1?[...L].map(z=>Z[z].n.split(' ')[0]).join('+'):Z[[...L][0]].n;}
+    const s=plan.find(p=>p.use===f);
+    if(s)u.f.querySelector('.zname').textContent=s.no+'. '+Z[s.zone].n;
+  }
+  document.querySelectorAll('#tbody tr').forEach(tr=>{
+    tr.classList.toggle('done',loads[tr.dataset.face].size>0);
+    tr.classList.toggle('now',hi===tr.dataset.face);
+  });
+}
+function renderHud(){
+  const info=stateInfo(clamp(Math.round(pos),0,2),Math.round(flip));
+  const layers=pos<.004?1:pos<1.996?2:4;
+  const t=pos<.004?'<b>Flat</b> — 4 faces up, 4 down, all 8 reachable'
+    :pos>1.996?'<b>Folded</b> — 4 layers, one quarter-size packet'
+    :'<b>'+FOLDS[clamp(Math.floor(pos),0,1)].name+'</b> — '+Math.round(clamp(pos-Math.floor(pos),0,1)*100)+'%';
+  const fts=info.map(g=>g.top+'↑ '+g.bot+'↓').join(' · ');
+  hud.innerHTML='<div class="chip">'+t+'</div><div class="chip">'+info.length+' footprint'+(info.length>1?'s':'')+
+   ' · '+layers+' layer'+(layers>1?'s':'')+' · '+fts+'</div>'+
+   (stats.press?'<div class="chip warn"><b>'+stats.press+'</b> clean face'+(stats.press>1?'s':'')+' contaminated by pressing</div>':'')+
+   (stats.cross?'<div class="chip warn"><b>'+stats.cross+'</b> cross-contamination event'+(stats.cross>1?'s':'')+'</div>':'')+
+   (!stats.press&&!stats.cross&&order.length?'<div class="chip good">no contaminated transfer so far</div>':'');
+}
+function renderVerd(){
+  const un=new Set(order).size===order.length;
+  document.getElementById('verd').innerHTML=
+   '<span class="vc'+(order.length===8?' ok':'')+'">'+order.length+'/8 faces used</span>'+
+   '<span class="vc'+(order.length&&un?' ok':order.length?' no':'')+'">'+(order.length?(un?'no face reused':'FACE REUSED'):'—')+'</span>'+
+   '<span class="vc'+(stats.press?' no':' ok')+'">'+stats.press+' dirty→clean presses</span>'+
+   '<span class="vc'+(stats.cross?' no':' ok')+'">'+stats.cross+' cross-contamination</span>'+
+   (surface.size?'<span class="vc no">surface holds '+[...surface].map(z=>Z[z].n.split(' ')[0]).join('+')+'</span>':'');
+}
+function renderLog(){
+  document.getElementById('log').innerHTML=log.slice(-9).reverse()
+   .map(r=>'<div class="'+r[1]+'">'+r[0]+'</div>').join('');
+}
+
+/* ═════ 8. PROTOCOL RUNNER ═════ */
+let tok=0,timer=null;
+const stop=()=>{clearTimeout(timer);tok++;};
+function goStep(){
+  const my=++tok;
+  if(poseIdx>=plan.length-1){hi=null;paintFaces();renderHud();return;}
+  poseIdx++;
+  const s=plan[poseIdx];
+  posT=s.k;flipT=s.f;contactPass(s.k,s.f);
+  if(s.use){
+    hi=s.use;paintFaces();markBody(s.zone);paintMap(poseIdx);
+    const el=cells[s.use].f;el.classList.add('wiping');
+    timer=setTimeout(()=>{
+      if(my!==tok)return;
+      el.classList.remove('wiping');wipe(s.use,s.zone,true);
+      say('<b>'+s.no+'/8</b> — '+s.use+' wiped with '+
+          Z[s.zone].n.toLowerCase()+'. '+(s.act||''),'ok');
+      hi=null;paintFaces();renderHud();
+      timer=setTimeout(()=>{if(my===tok)goStep();},800);
+    },1750);
+  } else {
+    say('<b>—</b> '+s.act);hi=null;paintFaces();renderHud();
+    timer=setTimeout(()=>{if(my===tok)goStep();},1400);
+  }
+}
+function startRun(){
+  stop();resetEngine();poseIdx=-1;posT=0;flipT=0;contactPass(0,0);
+  hi=null;paintFaces();paintMap(-1);markBody(null);
+  timer=setTimeout(goStep,500);
+}
+
+/* ═════ 9. CONTROLS ═════ */
+const $=id=>document.getElementById(id),posEl=$('pos'),surfSel=$('surfLoad'),restBox=$('rest');
+$('run').onclick=startRun;
+$('next').onclick=()=>{stop();if(poseIdx<0){resetEngine();contactPass(0,0);}goStep();};
+$('flip').onclick=()=>{stop();flipT=flipT>.5?0:1;const f=Math.round(flipT);
+ setTimeout(()=>contactPass(clamp(Math.round(posT),0,2),f),750);};
+$('foldAll').onclick=()=>{stop();posT=2;setTimeout(()=>contactPass(2,Math.round(flipT)),950);};
+$('flat').onclick=()=>{stop();posT=0;setTimeout(()=>contactPass(0,Math.round(flipT)),950);};
+$('reset').onclick=()=>{stop();pos=posT=0;flip=flipT=0;yaw=-18;pitch=56;scale=1;
+ poseIdx=-1;hi=null;resetEngine();contactPass(0,0);paintMap(-1);markBody(null);};
+posEl.oninput=e=>{stop();posT=pos=+e.target.value;contactPass(clamp(Math.round(posT),0,2),Math.round(flipT));};
+$('tgCrease').onchange=e=>cloth.classList.toggle('show-creases',e.target.checked);
+$('tgSpin').onchange=e=>{spin=e.target.checked;};
+restBox.onchange=e=>{
+  resting=e.target.checked;
+  surface=new Set(resting&&surfSel.value?[surfSel.value]:[]);
+  if(resting)say('<b>Set-down mode.</b> Whatever the packet rests on is now part of the contamination path.','no');
+  else{say('Hovering — there is no surface under the cloth.','ok');renderVerd();}
+};
+surfSel.onchange=e=>{
+  if(resting){surface=new Set(e.target.value?[e.target.value]:[]);
+    say(e.target.value?'<b>Surface is dirty</b> — it already carries '+Z[e.target.value].n.toLowerCase()+'.'
+                     :'Surface is clean.','no');}
+  renderVerd();
+};
+$('preset').onchange=e=>{preset=e.target.value;stop();poseIdx=-1;
+  buildPlan();buildBody();zonePicker();sizing();markBody(null);paintMap(-1);};
+$('size').onchange=e=>{size=+e.target.value;sizing();fitBars();};
+$('zpick').onclick=e=>{const c=e.target.closest('.zc');if(!c)return;
+  zonePick=c.dataset.z;zonePicker();markBody(zonePick);};
+$('tbody').onclick=e=>{const tr=e.target.closest('tr');if(!tr)return;
+  const s=plan.find(p=>p.use===tr.dataset.face);if(!s)return;
+  stop();poseIdx=s.i-1;goStep();};
+let dragged=false;
+cloth.addEventListener('click',e=>{
+  if(dragged){dragged=false;return;}
+  const f=e.target.closest('.f');if(!f)return;
+  stop();wipe(f.dataset.face,zonePick);
+  const s=plan.find(p=>p.use===f.dataset.face);
+  hi=s?s.use:null;paintFaces();markBody(zonePick);
+  paintMap(Math.max.apply(null,plan.filter(p=>p.use&&loads[p.use].size).map(p=>p.i).concat([-1])));
+});
+
+/* ═════ 10. ORBIT + LOOP ═════ */
 let drag=null;
-stage.addEventListener('pointerdown',e=>{
-  drag={x:e.clientX,y:e.clientY}; stage.classList.add('drag');
-  stage.setPointerCapture(e.pointerId);
-});
-stage.addEventListener('pointermove',e=>{
-  if(!drag) return;
-  yaw   -= (e.clientX-drag.x)*0.42;
-  pitch  = clamp(pitch-(e.clientY-drag.y)*0.42,-88,88);
-  drag={x:e.clientX,y:e.clientY};
-});
-const endDrag=()=>{drag=null;stage.classList.remove('drag');};
-stage.addEventListener('pointerup',endDrag);
-stage.addEventListener('pointercancel',endDrag);
-stage.addEventListener('wheel',e=>{
-  e.preventDefault(); scale=clamp(scale*(e.deltaY>0?0.94:1.06),0.35,2.4);
-},{passive:false});
+stage.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,moved:0};
+ stage.classList.add('drag');stage.setPointerCapture(e.pointerId);});
+stage.addEventListener('pointermove',e=>{if(!drag)return;
+ drag.moved+=Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y);
+ yaw-=(e.clientX-drag.x)*.42;pitch=clamp(pitch-(e.clientY-drag.y)*.42,-88,88);
+ drag={x:e.clientX,y:e.clientY,moved:drag.moved};});
+const endDrag=()=>{if(drag&&drag.moved>6)dragged=true;drag=null;stage.classList.remove('drag');};
+stage.addEventListener('pointerup',endDrag);stage.addEventListener('pointercancel',endDrag);
+stage.addEventListener('wheel',e=>{e.preventDefault();
+ scale=clamp(scale*(e.deltaY>0?.94:1.06),.35,2.4);},{passive:false});
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let last=performance.now();
+function tick(now){
+  const dt=Math.min(50,now-last);last=now;
+  if(spin)yaw+=dt*.012;
+  const k=reduce?1:1-Math.pow(.0016,dt/1000);
+  pos+=(posT-pos)*k;flip+=(flipT-flip)*k;
+  if(Math.abs(posT-pos)<.0006)pos=posT;
+  if(Math.abs(flipT-flip)<.0006)flip=flipT;
+  render();requestAnimationFrame(tick);
+}
 
-/* ============================== NOTES ============================= */
-document.getElementById('surfNote').innerHTML =
-  `Click any row to jump there. <b class="risk">Used faces on the table</b> is the cost of the `+
-  `quarters fold: every time you open a crease you lay your finished, dirty faces down on the `+
-  `worktop. The roll fold has no opens at all.`;
-
+/* ═════ 11. BOOT ═════ */
+$('hNote').innerHTML='<b>Hovering is the whole trick.</b> In the air the only transfer left is face against '+
+ 'face — and the two-fold never buries a face you have already used. Turn set-down on and the plan '+
+ 'breaks within two steps.';
+buildPlan();buildBody();zonePicker();sizing();renderVerd();paintMap(-1);markBody(null);
+contactPass(0,0);
 requestAnimationFrame(tick);
 </script>
 </body>

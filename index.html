@@ -3,706 +3,419 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Eight clean surfaces — one square, two folds, one path</title>
+<title>Fold · Wipe · Unfold — a hovering handkerchief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#070a0f;--panel:#111923;--panel2:#0c131a;--line:#1e2a36;--line2:#2b3b4b;
- --ink:#e7eff6;--mut:#8ba0b4;--dim:#5d6f81;--clean:#14b8a6;--dirty:#ef6a4c;--gold:#fbbf24;--bad:#f43f5e;--r:13px}
+:root{
+  --paper:#efe8dc; --ink:#2a2724; --mut:#7a7166; --faint:#c3b7a5;
+  --hem:#35507e; --s:130px; --dur:1.15s; --ease:cubic-bezier(.65,0,.25,1);
+  --serif:"Fraunces","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
 *{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;color:var(--ink);background:radial-gradient(1200px 850px at 50% -14%,#16212c 0%,var(--bg) 62%);
- font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
-.app{max-width:1340px;margin:0 auto;padding:24px 22px 60px}
-header{display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;margin-bottom:20px}
-h1{font-size:25px;letter-spacing:-.022em;margin:0;font-weight:650}
-h1 em{font-style:normal;color:var(--clean)}
-.tag{margin:0;color:var(--mut);font-size:14px}
-.sw2{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:10px;transform:translateY(1px);
- background:linear-gradient(135deg,#22c3b0,#ef6a4c)}
-main{display:grid;grid-template-columns:minmax(0,1fr) 372px;gap:20px;align-items:start}
-@media(max-width:1040px){main{grid-template-columns:1fr}}
-.stage-col{background:var(--panel2);border:1px solid var(--line);border-radius:18px;overflow:hidden}
-.stage{position:relative;height:min(64vh,540px);min-height:370px;perspective:1450px;perspective-origin:50% 44%;
- background:radial-gradient(760px 480px at 50% 32%,#121c26,#080c12 76%);cursor:grab;touch-action:none;overflow:hidden}
+html,body{margin:0;min-height:100%}
+body{
+  color:var(--ink);font:14px/1.6 var(--sans);-webkit-font-smoothing:antialiased;background:var(--paper);
+  background-image:
+    radial-gradient(1000px 700px at 36% 42%,#f8f3ea 0%,rgba(248,243,234,0) 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .25 0 0 0 0 .2 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 370px;min-height:100vh}
+@media(max-width:980px){.wrap{grid-template-columns:1fr}}
+.left{display:flex;flex-direction:column;padding:34px 38px 26px}
+header .kick{font:500 11px var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--mut)}
+h1{font:350 44px/1.05 var(--serif);letter-spacing:-.02em;margin:8px 0 8px}
+h1 em{font-style:italic;font-weight:300;color:#5b6f93}
+header p{margin:0;color:var(--mut);max-width:560px}
+
+/* ── stage ── */
+.stage{position:relative;flex:1;min-height:420px;height:min(64vh,620px);perspective:1300px;perspective-origin:50% 40%;
+  cursor:grab;touch-action:none;user-select:none}
 .stage.drag{cursor:grabbing}
-.orbit{position:absolute;left:50%;top:50%;width:260px;height:260px;margin:-130px 0 0 -130px;transform-style:preserve-3d}
-.cloth{position:absolute;inset:0;transform:matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,10,10,0,1);transform-style:preserve-3d}
-.ghost{position:absolute;left:0;top:0;width:240px;height:240px;transform:translateZ(-9px);pointer-events:none;
- border:1px dashed rgba(251,191,36,.30);border-radius:2px;transition:opacity .5s}
-.guides{position:absolute;left:0;top:0;width:240px;height:240px;transform:translateZ(-7px);pointer-events:none;transition:opacity .5s}
-.gl{position:absolute;background:repeating-linear-gradient(var(--d,90deg),rgba(251,191,36,.5) 0 6px,transparent 6px 13px)}
-.gv{--d:90deg;width:1.5px;top:-34px;height:308px;left:120px}
-.gh{--d:180deg;height:1.5px;left:-34px;width:308px;top:120px}
-.badge{position:absolute;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11.5px;
- font-weight:700;color:#0a0f14;background:var(--gold);box-shadow:0 0 0 4px rgba(251,191,36,.15)}
-.cell{position:absolute;left:0;top:0;width:120px;height:120px;transform-origin:0 0;transform-style:preserve-3d;--sh:.28;--hi:.07}
-.f{position:absolute;inset:0;backface-visibility:hidden;border-radius:2px;overflow:hidden;display:grid;place-items:center;
- border:1px dashed transparent;cursor:crosshair;box-shadow:0 1px 0 rgba(255,255,255,.06) inset}
-.f::after{content:"";position:absolute;inset:0;pointer-events:none;
- background:linear-gradient(rgba(255,255,255,var(--hi)),rgba(255,255,255,0)),rgba(3,8,14,var(--sh))}
-.show-creases .f{border-color:rgba(255,255,255,.20)}
-.f-front{background:repeating-linear-gradient(45deg,rgba(255,255,255,.055) 0 7px,transparent 7px 14px),
- linear-gradient(158deg,#22c3b0,#0e9189 55%,#0a6b73);color:#eafffb}
-.f-back{transform:rotateY(180deg);background:repeating-linear-gradient(45deg,rgba(0,0,0,.17) 0 6px,rgba(255,255,255,.05) 6px 12px),
- linear-gradient(158deg,#f0744f,#c7452c 55%,#8d2e1f);color:#ffeee7}
-.f b{font-size:30px;font-weight:700;letter-spacing:-.03em;opacity:.9;text-shadow:0 2px 10px rgba(0,0,0,.35)}
-.f i{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-style:normal;font-size:8.5px;
- letter-spacing:.1em;text-transform:uppercase;opacity:.6}
-.zname{position:absolute;top:5px;left:5px;right:5px;text-align:center;font-size:10px;font-weight:650;padding:3px 4px;
- border-radius:5px;background:rgba(4,10,14,.74);opacity:0;transition:opacity .25s;z-index:3}
-.f.hi .zname{opacity:1}
-.wipe{position:absolute;inset:0;opacity:0;pointer-events:none;z-index:2;
- background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.85) 50%,transparent 62%)}
-.f.wiping .wipe{animation:sweep .52s ease-in-out 3}
-@keyframes sweep{0%{opacity:0;transform:translateX(-115%)}18%{opacity:1}82%{opacity:1}100%{opacity:0;transform:translateX(115%)}}
-.f.hi{outline:3px solid var(--gold);outline-offset:-3px}
-.f.used::before{content:"";position:absolute;inset:0;z-index:1;
- background:repeating-conic-gradient(rgba(0,0,0,.30) 0 25%,rgba(255,255,255,.10) 0 50%) 0 0/13px 13px}
-.f.spoil{outline:3px solid var(--bad);outline-offset:-3px}
-.load{position:absolute;bottom:21px;left:50%;transform:translateX(-50%);z-index:4;display:none;padding:2px 7px;
- border-radius:99px;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#070c11;background:#fff;white-space:nowrap}
-.f.hasload .load{display:block}
-.hud{position:absolute;left:15px;top:13px;z-index:5;display:flex;flex-direction:column;gap:6px;pointer-events:none;max-width:66%}
-.chip{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;width:fit-content;
- background:rgba(8,13,19,.80);border:1px solid var(--line2);font-size:12px;color:var(--mut);backdrop-filter:blur(8px)}
+.stage.instant *{transition:none!important}
+.halo{position:absolute;left:50%;top:52%;width:68%;aspect-ratio:1.5;translate:-50% -50%;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(255,253,248,.95),rgba(255,253,248,0));filter:blur(6px)}
+.scene{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d}
+.bob{transform-style:preserve-3d;animation:hover 7s ease-in-out infinite}
+@keyframes hover{0%,100%{transform:translateZ(0) rotateX(0) rotateY(0)}50%{transform:translateZ(18px) rotateX(2deg) rotateY(-2deg)}}
+.flipper,.shifter{position:absolute;left:0;top:0;transform-style:preserve-3d;transition:transform var(--dur) var(--ease)}
+.panel{position:absolute;width:var(--s);height:var(--s);transform-style:preserve-3d;transition:transform var(--dur) var(--ease)}
+.face{position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  box-shadow:inset 0 0 0 .5px rgba(60,45,25,.10),inset 0 0 26px rgba(90,70,40,.07)}
+.face.inner{background:
+  repeating-linear-gradient(0deg,rgba(120,98,60,.05) 0 1px,transparent 1px 3px),
+  repeating-linear-gradient(90deg,rgba(120,98,60,.05) 0 1px,transparent 1px 3px),
+  linear-gradient(160deg,#fffcf6,#f1eadc)}
+.face.outer{transform:rotateY(180deg);background:
+  repeating-linear-gradient(0deg,rgba(35,55,95,.06) 0 1px,transparent 1px 3px),
+  repeating-linear-gradient(90deg,rgba(35,55,95,.06) 0 1px,transparent 1px 3px),
+  linear-gradient(160deg,#e4ebf2,#cbd6e2)}
+.hem{position:absolute;border:0 double var(--hem);opacity:.7;pointer-events:none}
+.mono{position:absolute;left:18px;top:18px;width:18px;height:18px;fill:none;stroke:var(--hem);stroke-width:1.3;
+  stroke-dasharray:2 1.6;opacity:.75}
+.stain{position:absolute;inset:0;opacity:0;transition:opacity 1.1s ease;filter:url(#bleed)}
+.stain.on{opacity:1}
+.brush{position:absolute;inset:-35%;opacity:0;pointer-events:none}
+.face.rub .brush{animation:rub 1.6s ease-in-out}
+@keyframes rub{0%{opacity:0;transform:translate(-26%,-12%)}15%{opacity:1}32%{transform:translate(22%,6%)}
+  52%{transform:translate(-18%,14%)}72%{transform:translate(20%,-10%)}86%{opacity:1}100%{opacity:0;transform:translate(0,0)}}
+.chip{position:absolute;left:0;top:10px;z-index:3;padding:6px 13px;border-radius:99px;font-size:12px;color:var(--mut);
+  background:rgba(255,252,246,.75);border:1px solid rgba(120,100,70,.18);backdrop-filter:blur(6px);transition:.3s}
 .chip b{color:var(--ink);font-weight:600}
-.chip.warn{border-color:#7f1d1d;background:rgba(58,10,16,.86);color:#fda4af}
-.chip.good{border-color:#14532d;background:rgba(6,42,26,.84);color:#86efac}
-.hint{position:absolute;right:15px;bottom:13px;z-index:5;font-size:11px;color:var(--dim);pointer-events:none}
-.transport{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:13px 15px;border-top:1px solid var(--line);background:#0b1118}
-button{font:inherit;font-size:13px;font-weight:550;color:var(--ink);cursor:pointer;background:#18232e;border:1px solid var(--line2);
- border-radius:9px;padding:8px 13px;transition:.14s}
-button:hover{background:#22303d;border-color:#3b5063}
-button:active{transform:translateY(1px)}
-button.pri{background:linear-gradient(180deg,#17b3a2,#0e8c81);border-color:#12a091;color:#02201d;font-weight:650}
-button.pri:hover{background:linear-gradient(180deg,#1cc4b2,#12a091)}
-.spacer{flex:1}
-.scrub{padding:0 15px 15px;background:#0b1118;border-top:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-input[type=range]{-webkit-appearance:none;appearance:none;flex:1;min-width:140px;height:5px;border-radius:99px;
- background:linear-gradient(90deg,var(--clean) var(--p,0%),#1e2a36 var(--p,0%));outline:none}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#eafffb;
- border:3px solid var(--clean);cursor:grab;box-shadow:0 2px 8px rgba(0,0,0,.5)}
-input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#eafffb;border:3px solid var(--clean);cursor:grab}
-.mini{font-size:11.5px;color:var(--dim);white-space:nowrap;font-variant-numeric:tabular-nums}
-.panel{display:flex;flex-direction:column;gap:14px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:15px 16px}
-.card h2{margin:0 0 3px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:650}
-.card p{margin:7px 0 0;font-size:13px;color:var(--mut)}
-.card p b{color:var(--ink);font-weight:600}
-.legend{display:flex;gap:14px;margin-top:11px;flex-wrap:wrap}
-.legend span{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--mut)}
-.sw{width:14px;height:14px;border-radius:4px}
-.sw.c{background:linear-gradient(150deg,#22c3b0,#0a6b73)}
-.sw.d{background:linear-gradient(150deg,#f0744f,#8d2e1f)}
-ol.steps{margin:9px 0 0;padding:0;list-style:none;counter-reset:s}
-ol.steps li{counter-increment:s;position:relative;padding:8px 0 8px 32px;font-size:13px;color:var(--mut);border-bottom:1px dashed var(--line)}
-ol.steps li:last-child{border-bottom:0}
-ol.steps li::before{content:counter(s);position:absolute;left:0;top:8px;width:20px;height:20px;border-radius:6px;
- background:#1b2734;color:var(--ink);display:grid;place-items:center;font-size:11px;font-weight:700}
-ol.steps li b{color:var(--ink);font-weight:600}
-.face-row{display:flex;gap:12px;align-items:flex-start;margin-top:12px}
-.face-row svg{flex:0 0 116px;border-radius:9px;background:#0a1017;border:1px solid var(--line)}
-.mapwrap{flex:1;min-width:0}
-#map{width:100%;height:auto;display:block;border-radius:9px;background:#0a1017;border:1px solid var(--line)}
-.maplab{display:flex;justify-content:space-between;gap:8px;font-size:10.5px;color:var(--dim);margin-top:6px}
-.verdicts{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
-.vc{padding:4px 8px;border-radius:7px;font-size:10.5px;font-weight:600;background:#141d26;border:1px solid var(--line2);color:var(--mut)}
-.vc.ok{background:#0c2a1d;border-color:#166534;color:#86efac}
-.vc.no{background:#2c0d14;border-color:#7f1d1d;color:#fda4af}
-table.surf{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}
-table.surf th{text-align:left;font-weight:600;color:var(--dim);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:0 4px 6px}
-table.surf td{padding:5px 4px;border-top:1px solid var(--line);color:var(--mut);font-variant-numeric:tabular-nums}
-table.surf tr{cursor:pointer}
-table.surf tr:hover td{background:#18212b}
-table.surf tr.now td{background:#1d2530;color:var(--ink)}
-table.surf tr.done .zn{color:#7d8f9f}
-.n{width:18px;height:18px;border-radius:5px;display:inline-grid;place-items:center;font-size:10px;font-weight:700;color:#0b1116}
-.fc{width:22px;height:18px;border-radius:4px;display:inline-grid;place-items:center;font-size:9.5px;font-weight:700;color:#0b1116}
-.bar{height:5px;border-radius:99px;background:#1b2632;overflow:hidden;min-width:30px}
-.bar i{display:block;height:100%;background:var(--clean);border-radius:99px}
-.bar.tight i{background:var(--gold)}
-.zonepick{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
-.zc{display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:8px;font-size:11.5px;cursor:pointer;
- background:#141d26;border:1px solid var(--line);color:var(--mut);user-select:none;transition:.13s}
-.zc:hover{border-color:#3b5063;color:var(--ink)}
-.zc.on{border-color:var(--clean);color:var(--ink);background:#10241f}
-.zc i{width:9px;height:9px;border-radius:3px;display:block}
-.row{display:flex;align-items:center;gap:9px;margin-top:11px;flex-wrap:wrap;font-size:12.5px;color:var(--mut)}
-label.chk{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--mut);background:#141d26;border:1px solid var(--line);
- border-radius:8px;padding:7px 10px;cursor:pointer;user-select:none}
-label.chk input{accent-color:var(--clean);margin:0}
-select{font:inherit;font-size:12.5px;color:var(--ink);background:#141d26;border:1px solid var(--line2);border-radius:8px;padding:7px 9px}
-.log{margin-top:10px;font-size:11.5px;display:flex;flex-direction:column;gap:4px}
-.log div{padding:5px 8px;border-radius:6px;background:#121a23;color:var(--mut);border-left:2px solid var(--line2)}
-.log div.no{border-left-color:var(--bad);color:#fda4af;background:#1d0e12}
-.log div.ok{border-left-color:#34d399;color:#a7f3d0;background:#0c1f18}
-.sizing{margin-top:11px;display:flex;flex-direction:column;gap:6px}
-.srow{display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--mut);font-variant-numeric:tabular-nums}
-.srow span:first-child{width:104px;flex:0 0 104px}
-.srow .bar{flex:1}
-.srow em{font-style:normal;color:var(--ink);font-weight:600;width:76px;flex:0 0 76px;text-align:right}
-.note{border-color:#3b2a16;background:linear-gradient(180deg,#1a150e,#111009)}
-.note h2{color:#d9a441}
-.note p{color:#c2ad8b}
-.note b{color:#f0d9ae}
+.chip.live{color:var(--ink);border-color:var(--c)}
+.chip i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;background:var(--c,#aaa)}
+.hint{position:absolute;right:0;bottom:6px;font-size:11px;color:var(--faint);pointer-events:none}
+
+/* ── transport ── */
+.bar{display:flex;align-items:center;gap:10px;margin-top:10px}
+.btn{width:40px;height:40px;border-radius:50%;border:1px solid rgba(120,100,70,.25);background:rgba(255,252,246,.6);
+  color:var(--ink);font:500 15px var(--sans);cursor:pointer;display:grid;place-items:center;transition:.15s;flex:0 0 auto}
+.btn:hover{background:#fffdf8;border-color:rgba(120,100,70,.45)}
+.btn.main{width:48px;height:48px;background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.timeline{display:flex;flex:1;margin-left:10px}
+.tick{flex:1;background:none;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;
+  padding:6px 0;color:var(--mut);font:11.5px var(--sans);position:relative;min-width:0}
+.tick::before{content:"";position:absolute;top:13px;left:-50%;right:50%;height:1px;background:var(--faint)}
+.tick:first-child::before{display:none}
+.tick .dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--faint);background:var(--paper);
+  position:relative;z-index:1;transition:.3s}
+.tick.past .dot{background:var(--ink);border-color:var(--ink)}
+.tick.past.w .dot{background:var(--c);border-color:var(--c)}
+.tick.on{color:var(--ink)}
+.tick.on .dot{transform:scale(1.3);box-shadow:0 0 0 5px rgba(42,39,36,.08)}
+.tick span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+@media(max-width:640px){.tick span:last-child{display:none}.left{padding:22px 16px}h1{font-size:34px}}
+
+/* ── aside ── */
+aside{border-left:1px solid rgba(120,100,70,.16);padding:34px 30px;display:flex;flex-direction:column;gap:22px;
+  background:rgba(255,252,246,.35)}
+@media(max-width:980px){aside{border-left:0;border-top:1px solid rgba(120,100,70,.16)}}
+.now .k{font:500 11px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
+.now h2{font:380 32px/1.1 var(--serif);margin:6px 0 8px;letter-spacing:-.015em}
+.now p{margin:0;color:#4d463e;min-height:88px}
+.now p em{font-family:var(--serif);font-style:italic}
+.fade{animation:fade .5s ease}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+#face{width:100%;max-width:250px;display:block;margin:0 auto}
+#face .base{fill:#fbf6ec}
+#face .ink{fill:none;stroke:var(--ink);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+#face .cap{font:italic 12px var(--serif);fill:var(--mut);text-anchor:middle}
+.zone{fill:transparent;stroke:var(--faint);stroke-width:1.2;stroke-dasharray:3 3;transition:fill .5s,fill-opacity .5s,stroke .5s}
+.zone.done{fill:var(--c);fill-opacity:.35;stroke:var(--c);stroke-dasharray:none}
+.zone.active{fill:var(--c);fill-opacity:.7;stroke:var(--c);stroke-dasharray:none;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{fill-opacity:.35}}
+.sec{font:500 11px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin:0 0 10px}
+.ledger{display:flex;gap:18px}
+.lg{flex:1}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;aspect-ratio:1;padding:3px;border-radius:3px}
+.grid.in{background:#e6dccb}.grid.out{background:#b9c7d8}
+.cell{position:relative;border-radius:2px;display:grid;place-items:center;font:italic 11.5px var(--serif);color:rgba(42,39,36,.8);transition:.4s}
+.grid.in .cell{background:#fbf7ee}.grid.out .cell{background:#dfe6ee}
+.cell.inside{background-image:repeating-linear-gradient(45deg,rgba(60,50,40,.13) 0 1px,transparent 1px 6px)!important}
+.cell.top::after{content:"";position:absolute;inset:4px;border:1.5px solid var(--ink);border-radius:50%;opacity:.55}
+.cell.used{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.lg small{display:block;margin-top:7px;font-size:11.5px;color:var(--mut)}
+.lg small em{font-family:var(--serif)}
+.legend{display:flex;gap:16px;margin-top:10px;font-size:11.5px;color:var(--mut)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:13px;height:13px;display:inline-block;border-radius:2px;background:#f3ede2}
+.legend .r{border:1.5px solid var(--ink);border-radius:50%;opacity:.6}
+.legend .h{background-image:repeating-linear-gradient(45deg,rgba(60,50,40,.25) 0 1px,transparent 1px 4px)}
+.count{margin-top:10px;font:italic 15px var(--serif)}
+.count b{font-style:normal;font-weight:500}
+.rules{margin:0;padding:0;list-style:none;border-top:1px solid rgba(120,100,70,.16)}
+.rules li{padding:9px 0;border-bottom:1px solid rgba(120,100,70,.12);color:#4d463e;font-size:13px}
+.rules li b{font:italic 500 14px var(--serif);color:var(--ink);margin-right:6px}
 </style>
 </head>
 <body>
-<div class="app">
-<header>
- <h1><span class="sw2"></span>Eight clean surfaces from <em>one square</em></h1>
- <p class="tag">Two folds, eight faces, one path — wiped once, in order, never twice.</p>
-</header>
-<main>
- <section class="stage-col">
-  <div class="stage" id="stage">
-   <div class="hud" id="hud"></div>
-   <div class="orbit" id="orbit">
-    <div class="cloth" id="cloth">
-     <div class="ghost" id="ghost"></div>
-     <div class="guides" id="guides">
-      <div class="gl gv"></div><div class="gl gh"></div>
-      <div class="badge" style="left:109px;top:-34px">1</div>
-      <div class="badge" style="left:-34px;top:109px">2</div>
-     </div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="bleed"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" seed="7"/>
+    <feDisplacementMap in="SourceGraphic" scale="9"/></filter>
+</svg>
+
+<div class="wrap">
+  <section class="left">
+    <header>
+      <div class="kick">A hovering handkerchief · the progressive unfold</div>
+      <h1>Fold, wipe, <em>unfold.</em></h1>
+      <p>One square, two folds. Each fold hides clean cloth inside, where only other clean cloth can touch it. Open it one fold at a time and every wipe gets a fresh surface.</p>
+    </header>
+
+    <div class="stage" id="stage">
+      <div class="halo"></div>
+      <div class="chip" id="chip"></div>
+      <div class="scene" id="scene"><div class="bob"><div class="flipper" id="flipper"><div class="shifter" id="shifter">
+        <div class="panel" id="pD" style="left:var(--s);top:var(--s)">
+          <div class="panel" id="pC" style="left:calc(-1*var(--s));top:0;transform-origin:100% 50%"></div>
+          <div class="panel" id="pB" style="left:0;top:calc(-1*var(--s));transform-origin:50% 100%">
+            <div class="panel" id="pA" style="left:calc(-1*var(--s));top:0;transform-origin:100% 50%"></div>
+          </div>
+        </div>
+      </div></div></div></div>
+      <div class="hint">drag to tilt · ← → step · space play</div>
     </div>
-   </div>
-   <div class="hint">drag to orbit · scroll to zoom · click a face to wipe it</div>
-  </div>
-  <div class="transport">
-   <button class="pri" id="run">▶ Run the 8-surface wipe</button>
-   <button id="next">Step</button><button id="flip">Turn over</button>
-   <button id="foldAll">Fold both</button><button id="flat">Unfold</button>
-   <div class="spacer"></div><button id="reset">Reset</button>
-  </div>
-  <div class="scrub">
-   <span class="mini" id="posLbl">flat</span>
-   <input type="range" id="pos" min="0" max="2" step="0.004" value="0">
-   <span class="mini" id="flipLbl">printed side up</span>
-   <label class="chk" style="margin-left:auto"><input type="checkbox" id="tgCrease" checked> creases</label>
-   <label class="chk"><input type="checkbox" id="tgSpin"> orbit</label>
-  </div>
- </section>
- <aside class="panel">
-  <div class="card">
-   <h2>The fold — 2 creases, 4 layers, 8 faces</h2>
-   <p>A square, folded in half and in half again. Every face keeps a fixed <b>printed</b> side and a fixed
-    <b>reverse</b> side; creasing never swaps them.</p>
-   <div class="legend">
-    <span><i class="sw c"></i> printed — 1f 2f 3f 4f</span>
-    <span><i class="sw d"></i> reverse — 1b 2b 3b 4b</span>
-   </div>
-   <ol class="steps">
-    <li><b>Left half onto right half.</b> 2 layers, right-hand rectangle.</li>
-    <li><b>Top half onto bottom half.</b> 4 layers, one quarter of the square.</li>
-    <li><b>Hover.</b> Nothing touches anything, so a wiped face stays wiped. The only transfer left is
-     <b>face against face</b> — and this fold never buries a face you have already used.</li>
-   </ol>
-  </div>
-  <div class="card">
-   <h2>The plan — clean area grows ¼ → ½ → 1</h2>
-   <div class="face-row">
-    <svg id="body" viewBox="0 0 130 212" aria-label="body zones"></svg>
-    <div class="mapwrap">
-     <svg id="map" viewBox="0 0 200 200" aria-label="coverage map"></svg>
-     <div class="maplab"><span id="mapA">—</span><span id="mapB">—</span></div>
-     <div class="verdicts" id="verd"></div>
+
+    <div class="bar">
+      <button class="btn" id="prev" aria-label="Previous">‹</button>
+      <button class="btn main" id="play" aria-label="Play">▶</button>
+      <button class="btn" id="next" aria-label="Next">›</button>
+      <div class="timeline" id="tl"></div>
     </div>
-   </div>
-  </div>
-  <div class="card">
-   <h2>Surfaces, in order</h2>
-   <table class="surf">
-    <thead><tr><th>#</th><th>Face</th><th>Where</th><th>Wipes</th><th>Fit</th></tr></thead>
-    <tbody id="tbody"></tbody>
-   </table>
-   <p id="planNote" style="font-size:12px"></p>
-  </div>
-  <div class="card">
-   <h2>Handling — the only way to ruin it</h2>
-   <div class="row">
-    <label class="chk"><input type="checkbox" id="rest"> set it down between steps</label>
-    <select id="surfLoad">
-     <option value="">surface is clean</option>
-     <option value="lhand" selected>surface is a used towel (hands)</option>
-     <option value="rhand">shared with someone else</option>
-    </select>
-   </div>
-   <p id="hNote" style="font-size:12px"></p>
-   <h2 style="margin-top:16px">Wipe it yourself</h2>
-   <p style="font-size:12px">Pick a body part, then click any face in the 3-D view. The page tells you the
-    moment you break the path.</p>
-   <div class="zonepick" id="zpick"></div>
-   <div class="log" id="log"></div>
-  </div>
-  <div class="card">
-   <h2>How big a cloth do you need?</h2>
-   <div class="row">
-    <select id="preset">
-     <option value="face">Face only (8 targets)</option>
-     <option value="facehands" selected>Face + both hands</option>
-     <option value="body">Face + hands + forearms</option>
-    </select>
-    <select id="size">
-     <option value="15">15 cm square</option>
-     <option value="20">20 cm square</option>
-     <option value="30" selected>30 cm square</option>
-     <option value="45">45 cm bandana</option>
-    </select>
-   </div>
-   <div class="sizing" id="sizing"></div>
-  </div>
-  <div class="card note">
-   <h2>The honest bit</h2>
-   <p><b>Hovering is not a detail, it is the mechanism.</b> Set the packet down and the face you already
-    wiped picks up whatever was on that surface — switch the toggle above and watch step 2 go red.</p>
-   <p><b>You must turn the packet over once</b>, while it is still 4 layers thick, to reach the single face
-    on its underside. That one flip, pinched along a crease in mid-air, is the tightest moment in the
-    whole procedure.</p>
-   <p><b>And it is wasteful on purpose.</b> A 30 cm square gives 225 cm² per face against a 32 cm² cheek.
-    You are buying a guarantee, not efficiency — a 15 cm pocket square covers a whole face in eight
-    never-reused strokes.</p>
-  </div>
- </aside>
-</main>
+  </section>
+
+  <aside>
+    <div class="now" id="now"><div class="k" id="kick"></div><h2 id="title"></h2><p id="desc"></p></div>
+
+    <svg id="face" viewBox="0 0 240 258" aria-label="face and hands">
+      <ellipse class="base" cx="120" cy="92" rx="58" ry="72"/>
+      <ellipse class="zone" id="z-rcheek" cx="88" cy="112" rx="17" ry="13"/>
+      <ellipse class="zone" id="z-lcheek" cx="152" cy="112" rx="17" ry="13"/>
+      <ellipse class="zone" id="z-nose" cx="120" cy="99" rx="9" ry="24"/>
+      <g class="zone" id="z-hands">
+        <path transform="translate(56,178)" d="M10 66 L10 44 C4 40 0 32 2 26 C5 24 9 28 11 32 L11 20 C11 9 16 4 23 4 C30 4 35 9 35 20 L35 66 Z"/>
+        <path transform="translate(184,178) scale(-1,1)" d="M10 66 L10 44 C4 40 0 32 2 26 C5 24 9 28 11 32 L11 20 C11 9 16 4 23 4 C30 4 35 9 35 20 L35 66 Z"/>
+      </g>
+      <g class="ink">
+        <ellipse cx="120" cy="92" rx="58" ry="72"/>
+        <path d="M91 84 q10 7 20 0 M129 84 q10 7 20 0"/>
+        <path d="M120 80 q-7 24 -4 34 q5 4 10 0"/>
+        <path d="M105 136 q15 9 30 0"/>
+      </g>
+      <text class="cap" x="120" y="254">hands, last</text>
+    </svg>
+
+    <div>
+      <div class="sec">Both sides of the cloth</div>
+      <div class="ledger">
+        <div class="lg"><div class="grid in" id="gIn"></div><small>inner side</small></div>
+        <div class="lg"><div class="grid out" id="gOut"></div><small>outer side <em>(turned over)</em></small></div>
+      </div>
+      <div class="legend"><span><i class="r"></i>facing you</span><span><i class="h"></i>folded inside</span></div>
+      <div class="count" id="count"></div>
+    </div>
+
+    <ul class="rules">
+      <li><b>Clean → dirty.</b>Face first, hands last.</li>
+      <li><b>Small → large.</b>¼, ¼, ½, then the whole square.</li>
+      <li><b>Store clean inside.</b>A fold only presses unused cloth against unused cloth.</li>
+      <li><b>Hover.</b>Nothing below it, so nothing touches it except what it wipes.</li>
+    </ul>
+  </aside>
 </div>
+
 <script>
 "use strict";
-/* ═════ 1. MATRIX MATH ═════ */
-const PN=120, T=1;
-const I3=()=>[1,0,0,0,1,0,0,0,1];
-const clamp=(v,a,b)=>v<a?a:v>b?b:v;
-function mul(A,B){const C=new Array(9);
- for(let r=0;r<3;r++)for(let c=0;c<3;c++)C[r*3+c]=A[r*3]*B[c]+A[r*3+1]*B[3+c]+A[r*3+2]*B[6+c];
- return C;}
-const rotY=a=>{const c=Math.cos(a),s=Math.sin(a);return [c,0,s,0,1,0,-s,0,c];};
-const rotX=a=>{const c=Math.cos(a),s=Math.sin(a);return [1,0,0,0,c,-s,0,s,c];};
-const app3=(M,v)=>[M[0]*v[0]+M[1]*v[1]+M[2]*v[2],M[3]*v[0]+M[4]*v[1]+M[5]*v[2],M[6]*v[0]+M[7]*v[1]+M[8]*v[2]];
-const center=c=>[c.p[0]+(c.M[0]*PN/2+c.M[1]*PN/2),c.p[1]+(c.M[3]*PN/2+c.M[4]*PN/2),c.p[2]+(c.M[6]*PN/2+c.M[7]*PN/2)];
-
-/* ═════ 2. FOLD SIMULATOR ═════
-   4 panels: 1=top-left 2=top-right 3=bottom-left 4=bottom-right.
-   Each crease is one rigid 180° rotation about a hinge whose height comes
-   from the live layer stack, so flaps land exactly on top of what is there. */
-const FOLDS=[{axis:'y',c:PN,name:'crease ① — left half onto right half'},
-             {axis:'x',c:PN,name:'crease ② — top half onto bottom half'}];
-function simulate(pos,flip){
-  const cells=[];
-  for(let i=0;i<2;i++)for(let j=0;j<2;j++)cells.push({id:i*2+j+1,i,j,M:I3(),p:[i*PN,j*PN,0]});
-  for(let k=0;k<2;k++){
-    const u=clamp(pos-k,0,1);
-    if(u<=1e-6) break;
-    const f=FOLDS[k];
-    const info=cells.map(c=>({c,ctr:center(c)}));
-    const mv=info.filter(o=>f.axis==='y'?o.ctr[0]<f.c-0.01:o.ctr[1]<f.c-0.01);
-    const st=info.filter(o=>!mv.includes(o));
-    if(!mv.length) break;
-    const maxM=Math.max(...mv.map(o=>o.ctr[2]));
-    const maxS=st.length?Math.max(...st.map(o=>o.ctr[2])):0;
-    const h=(maxM+maxS+T)/2;
-    const R=f.axis==='y'?rotY(Math.PI*u):rotX(-Math.PI*u);
-    for(const o of mv){
-      const q=f.axis==='y'?[f.c,o.ctr[1],h]:[o.ctr[0],f.c,h];
-      const Rp=app3(R,o.c.p),Rq=app3(R,q);
-      o.c.M=mul(R,o.c.M);
-      o.c.p=[Rp[0]+q[0]-Rq[0],Rp[1]+q[1]-Rq[1],Rp[2]+q[2]-Rq[2]];
-    }
-  }
-  if(flip>1e-6){
-    const ys=cells.map(c=>center(c)[1]);
-    const q=[0,(Math.min(...ys)+Math.max(...ys))/2,0];
-    const R=rotX(-Math.PI*flip),Rq=app3(R,q);
-    for(const c of cells){const Rp=app3(R,c.p);c.M=mul(R,c.M);
-      c.p=[Rp[0]+q[0]-Rq[0],Rp[1]+q[1]-Rq[1],Rp[2]+q[2]-Rq[2]];}
-  }
-  return cells;
-}
-const keyOf=c=>Math.round(c[0]/PN)+','+Math.round(c[1]/PN);
-
-/* which faces can you physically touch at a given pose? */
-function stateInfo(k,flip){
-  const cells=simulate(k,flip),g=new Map();
-  for(const c of cells){const ctr=center(c),key=keyOf(ctr);
-    if(!g.has(key))g.set(key,[]);g.get(key).push(c);}
-  const out=[];
-  for(const [key,arr] of g){
-    arr.sort((a,b)=>center(a)[2]-center(b)[2]);
-    const up=c=>c.M[8]>0?'f':'b', dn=c=>up(c)==='f'?'b':'f';
-    const pairs=[];
-    for(let i=0;i<arr.length-1;i++)pairs.push(arr[i].id+up(arr[i])+'|'+arr[i+1].id+dn(arr[i+1]));
-    out.push({key,n:arr.length,layers:arr.map(c=>c.id+up(c)),
-      top:arr[arr.length-1].id+up(arr[arr.length-1]),bot:arr[0].id+dn(arr[0]),pairs});
-  }
-  const ord=s=>s.split(',').map(Number);
-  return out.sort((a,b)=>ord(a.key)[1]-ord(b.key)[1]||ord(a.key)[0]-ord(b.key)[0]);
-}
-const whereOf=(k,flip,face)=>{for(const g of stateInfo(k,flip))if(g.top===face||g.bot===face)return g.key;return null;};
-
-/* ═════ 3. DOM ═════ */
-const cloth=document.getElementById('cloth'),stage=document.getElementById('stage');
-const orbit=document.getElementById('orbit'),hud=document.getElementById('hud');
-const cells={};
-for(let i=0;i<2;i++)for(let j=0;j<2;j++){
-  const id=i*2+j+1,el=document.createElement('div');
-  el.className='cell';
-  el.innerHTML=['f','b'].map(s=>
-   `<div class="f f-${s==='f'?'front':'back'}" data-face="${id}${s}"><div class="zname"></div><div class="wipe"></div>`+
-   `<b>${id}</b><i>${s==='f'?'printed':'reverse'}</i><div class="load"></div></div>`).join('');
-  cloth.appendChild(el);
-  cells[id+'f']={el,f:el.querySelector('.f-front')};
-  cells[id+'b']={el,f:el.querySelector('.f-back')};
-}
-cloth.classList.add('show-creases');
-
-/* ═════ 4. ZONES & PROTOCOL ═════ */
-const Z={
- forehead:{n:'Forehead',a:55,c:'#34d399'},lcheek:{n:'Left cheek',a:32,c:'#f472b6'},
- rcheek:{n:'Right cheek',a:32,c:'#fb923c'},nose:{n:'Nose',a:18,c:'#facc15'},
- chin:{n:'Chin',a:16,c:'#a3e635'},lip:{n:'Upper lip',a:9,c:'#fb7185'},
- lear:{n:'Left ear',a:12,c:'#c084fc'},rear:{n:'Right ear',a:12,c:'#818cf8'},
- neck:{n:'Neck',a:55,c:'#22d3ee'},lhand:{n:'Left hand',a:170,c:'#60a5fa'},
- rhand:{n:'Right hand',a:170,c:'#a78bfa'},larm:{n:'Left forearm',a:120,c:'#2dd4bf'},
- rarm:{n:'Right forearm',a:120,c:'#f0abfc'}};
-const PRESETS={
- face:['lcheek','rcheek','nose','chin','forehead','lip','lear','rear'],
- facehands:['lcheek','rcheek','nose','chin','forehead','neck','lhand','rhand'],
- body:['lcheek','rcheek','nose','chin','neck','forehead','larm','rhand']};
-/* poses verified against the simulator: every face below is reachable & unused at that pose */
-const POSE=[
- {k:2,f:0,use:'3b',act:'Fold both creases. Wipe the top face.'},
- {k:2,f:1,use:'4b',act:'Turn the packet over in mid-air. Wipe the underside.'},
- {k:1,f:1,use:null,act:'Open crease ② while it is still face-down.'},
- {k:1,f:0,use:'1b',act:'Turn it back — only 2 layers thick now, much easier.'},
- {k:1,f:0,use:'2b',act:'Second face of the half-square.'},
- {k:0,f:0,use:'1f',act:'Unfold completely. Four printed faces left.'},
- {k:0,f:0,use:'2f',act:''},{k:0,f:0,use:'3f',act:''},{k:0,f:0,use:'4f',act:''}];
-const ALL8=['1f','1b','2f','2b','3f','3b','4f','4b'];
-const QNAME={'1,1':'top-left','2,1':'top-right','1,2':'bottom-left','2,2':'bottom-right'};
-const QXY={'1,1':[6,6],'2,1':[104,6],'1,2':[6,104],'2,2':[104,104]};
-let preset='facehands',size=30,zonePick='lcheek',poseIdx=-1,hi=null;
-
-/* ═════ 5. CONTAMINATION ENGINE ═════
-   A face carries a set of body-zone loads. Loads move by exactly two routes:
-   rubbing (a wipe) and pressing (face-against-face, or the surface below).   */
-const loads={},order=[],log=[];
-let surface=new Set(),resting=false,stats={reuse:0,cross:0,press:0,pressed:0};
-for(const f of ALL8)loads[f]=new Set();
-function say(t,c){log.push([t,c||'']);if(log.length>40)log.shift();renderLog();}
-function pick(face,zone,src){loads[face].add(zone);stats.cross++;say(face+' picked up <b>'+Z[zone].n.toLowerCase()+'</b> '+src,'no');}
-function wipe(face,zone,quiet){
-  const before=[...loads[face]];
-  if(before.length){stats.reuse++;
-    say('<b>Path reuse.</b> '+face+' already carried '+before.map(z=>Z[z].n.toLowerCase()).join(' + ')+' — now adding '+Z[zone].n.toLowerCase()+'.','no');}
-  const foreign=before.filter(z=>z!==zone);
-  if(foreign.length){stats.cross++;
-    say('<b>Cross-contamination.</b> '+face+' carried '+foreign.map(z=>Z[z].n.toLowerCase()).join(', ')+' into '+Z[zone].n.toLowerCase()+'.','no');}
-  if(!quiet&&!before.length)say(face+' wiped with <b>'+Z[zone].n.toLowerCase()+'</b> — first and only time.','ok');
-  loads[face].add(zone);
-  if(!order.includes(face))order.push(face);
-  paintFaces();renderVerd();
-}
-function resetEngine(){
-  for(const f of ALL8)loads[f]=new Set();
-  order.length=0;log.length=0;
-  stats={reuse:0,cross:0,press:0,pressed:0};
-  surface=new Set(surfSel.value?[surfSel.value]:[]);
-  lastContacts=new Set();renderLog();renderVerd();paintFaces();
-}
-let lastContacts=new Set();
-function contactPass(k,flip){
-  const now=new Set();
-  for(const g of stateInfo(k,flip))for(const p of g.pairs)now.add(p);
-  for(const p of now){
-    if(lastContacts.has(p))continue;
-    const[a,b]=p.split('|'),la=loads[a].size>0,lb=loads[b].size>0;
-    if(la&&!lb){stats.press++;pick(b,[...loads[a]][0],'by pressing against the already-wiped face '+a+'.');}
-    else if(lb&&!la){stats.press++;pick(a,[...loads[b]][0],'by pressing against the already-wiped face '+b+'.');}
-    else if(la&&lb)stats.pressed++;
-  }
-  lastContacts=now;
-  if(resting){
-    for(const g of stateInfo(k,flip)){
-      const b=g.bot;
-      for(const z of [...surface])if(!loads[b].has(z))
-        pick(b,z,'because the packet was set down on a surface that was not clean.');
-      for(const z of loads[b])surface.add(z);
-    }
-    renderVerd();paintFaces();
-  }
-}
-
-/* ═════ 6. PLAN / TABLE / MAP / BODY ═════ */
-let plan=[];
-function buildPlan(){
-  let n=0;
-  plan=POSE.map((s,i)=>{const o={...s,i};
-    if(s.use){o.no=++n;o.zone=PRESETS[preset][n-1];o.key=whereOf(s.k,s.f,s.use);}
-    return o;});
-  const tb=document.getElementById('tbody');tb.innerHTML='';
-  for(const s of plan){
-    if(!s.use)continue;
-    const tr=document.createElement('tr');tr.dataset.face=s.use;
-    tr.innerHTML='<td><span class="n" style="background:'+Z[s.zone].c+'">'+s.no+'</span></td>'+
-     '<td><span class="fc" style="background:'+(s.use[1]==='f'?'#22c3b0':'#f0744f')+'">'+s.use+'</span></td>'+
-     '<td>'+(QNAME[s.key]||'—')+'</td><td class="zn">'+Z[s.zone].n+'</td>'+
-     '<td><div class="bar" data-fit="'+s.zone+'"><i style="width:0%"></i></div></td>';
-    tb.appendChild(tr);
-  }
-  document.getElementById('planNote').innerHTML='Click a row to jump to it. The bar is <b>how much of that '+
-   'face the body part needs</b> — gold means the target nearly fills the face. The rest is the price of the guarantee.';
-  buildMap();fitBars();
-}
-function buildMap(){
-  let s='<rect x="2" y="2" width="196" height="196" rx="4" fill="none" stroke="#2b3b4b" stroke-dasharray="3 4"/>';
-  for(const k in QXY){const[x,y]=QXY[k];
-    s+='<rect x="'+x+'" y="'+y+'" width="90" height="90" rx="4" fill="#0f1820" stroke="#1e2a36"/>';}
-  s+='<rect id="cleanbox" x="104" y="104" width="90" height="90" rx="4" fill="rgba(20,184,166,.16)" stroke="#14b8a6" stroke-width="2"/>';
-  document.getElementById('map').innerHTML=s;
-}
-function paintMap(upto){
-  const box=document.getElementById('cleanbox');if(!box)return;
-  const st=upto<0?0:(upto<2?0:upto<5?1:2);
-  const R=[[104,104,90,90],[104,6,90,188],[6,6,188,188]][st];
-  box.setAttribute('x',R[0]);box.setAttribute('y',R[1]);
-  box.setAttribute('width',R[2]);box.setAttribute('height',R[3]);
-  document.getElementById('mapA').textContent='clean area exposed: '+['¼','½','1'][st];
-  const m=document.getElementById('map');
-  m.querySelectorAll('circle,text.n2').forEach(e=>e.remove());
-  const per={},NS='http://www.w3.org/2000/svg';let n=0;
-  for(const s of plan)if(s.use&&s.i<=upto)(per[s.key]=per[s.key]||[]).push(s);
-  for(const k in per)per[k].forEach((s,i)=>{
-    const[x,y]=QXY[k],cx=x+23+(i%2)*44,cy=y+23+Math.floor(i/2)*44;
-    const c=document.createElementNS(NS,'circle');
-    c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',12);
-    c.setAttribute('fill',Z[s.zone].c);c.setAttribute('stroke','#070a0f');c.setAttribute('stroke-width','2');
-    m.appendChild(c);
-    const t=document.createElementNS(NS,'text');t.setAttribute('class','n2');
-    t.setAttribute('x',cx);t.setAttribute('y',cy+4);t.setAttribute('text-anchor','middle');
-    t.setAttribute('font-size','11');t.setAttribute('font-weight','700');t.setAttribute('fill','#070a0f');
-    t.textContent=s.no;m.appendChild(t);n++;
-  });
-  document.getElementById('mapB').textContent=n+' of 8 surfaces used';
-}
-const SHAPE={forehead:['rect',45,18,40,19,8],nose:['ellipse',65,56,5,10],lip:['rect',57,72,16,6,3],
- chin:['ellipse',65,87,12,9],neck:['rect',56,82,18,17,3],lcheek:['ellipse',51,57,11,10],
- rcheek:['ellipse',79,57,11,10],lear:['circle',34,52,4.5],rear:['circle',96,52,4.5],
- larm:['rect',16,120,15,56,7],rarm:['rect',99,120,15,56,7],
- lhand:['ellipse',23,188,10,12],rhand:['ellipse',107,188,10,12]};
-function buildBody(){
-  let s='<ellipse cx="65" cy="46" rx="30" ry="37" fill="#0f1820" stroke="#2b3b4b"/>';
-  for(const k in SHAPE){const[t,x,y,w,h,r]=SHAPE[k],inP=PRESETS[preset].includes(k);
-    const geo=t==='rect'?'x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'"'
-      :(t==='circle'?'r="'+w+'"':'rx="'+w+'" ry="'+h+'"');
-    s+='<'+t+' class="bz" data-z="'+k+'" cx="'+x+'" cy="'+y+'" '+geo+' fill="'+(inP?Z[k].c:'#182029')+
-       '" fill-opacity="'+(inP?.20:.5)+'" stroke="'+(inP?Z[k].c:'#2b3b4b')+'" stroke-width="1.4"/>';}
-  document.getElementById('body').innerHTML=s;
-}
-function markBody(zone){
-  document.querySelectorAll('#body .bz').forEach(e=>{
-    const on=e.dataset.z===zone;
-    e.setAttribute('fill-opacity',on?.95:.20);e.setAttribute('stroke-width',on?2.6:1.4);
-  });
-}
-function fitBars(){
-  const per=Math.pow(size/2,2);
-  document.querySelectorAll('#tbody .bar').forEach(b=>{
-    const need=Z[b.dataset.fit].a,pct=clamp(need/per*100,4,100);
-    b.classList.toggle('tight',need/per>.7);b.firstElementChild.style.width=pct+'%';});
-}
-function sizing(){
-  const zs=PRESETS[preset],per=Math.pow(size/2,2),cap=2*size*size;
-  const need=zs.reduce((s,z)=>s+Z[z].a,0),big=Math.max.apply(null,zs.map(z=>Z[z].a));
-  const pc=(v,mx)=>clamp(v/mx*100,3,100);
-  document.getElementById('sizing').innerHTML=
-   '<div class="srow"><span>surface per face</span><div class="bar"><i style="width:'+pc(per,220)+'%"></i></div><em>'+per.toFixed(0)+' cm²</em></div>'+
-   '<div class="srow"><span>largest target</span><div class="bar'+(big/per>.7?' tight':'')+'"><i style="width:'+pc(big,per)+'%;background:'+(big/per>.7?'var(--gold)':'var(--clean)')+'"></i></div><em>'+big+' cm²</em></div>'+
-   '<div class="srow"><span>total body area</span><div class="bar"><i style="width:'+pc(need,cap)+'%"></i></div><em>'+need+' cm²</em></div>'+
-   '<div class="srow"><span>cloth wasted</span><div class="bar"><i style="width:'+(1-need/cap)*100+'%;background:#ef6a4c"></i></div><em>'+Math.round((1-need/cap)*100)+'%</em></div>'+
-   '<p style="font-size:12.5px;margin:5px 0 0">'+(per>=big
-     ? '<b style="color:#86efac">'+size+' cm works.</b> Each face is '+per.toFixed(0)+' cm²; the biggest target is '+big+' cm².'
-     : '<b style="color:#fda4af">'+size+' cm is too small.</b> The biggest target ('+big+' cm²) needs a face of at least '+big+' cm².')+
-   ' The binding constraint is the <b>largest single target</b>, so you need a side of at least '+
-   '<b style="color:#fbbf24">'+big+' cm² → '+size+' cm</b> for these eight. Going bigger buys comfort, not safety.</p>';
-}
-function zonePicker(){
-  document.getElementById('zpick').innerHTML=PRESETS[preset].map(k=>
-   '<div class="zc'+(k===zonePick?' on':'')+'" data-z="'+k+'"><i style="background:'+Z[k].c+'"></i>'+Z[k].n+'</div>').join('');
-}
-
-/* ═════ 7. RENDER ═════ */
-let pos=0,posT=0,flip=0,flipT=0,spin=false,yaw=-18,pitch=56,scale=1;
-const orbitM=()=>{const s=scale,m=mul(rotX(pitch*Math.PI/180),rotY(yaw*Math.PI/180));
- return [m[0]*s,m[3]*s,m[6]*s,0,m[1]*s,m[4]*s,m[7]*s,0,m[2]*s,m[5]*s,m[8]*s,0,0,0,0,1];};
-const Nm=mul(rotX(-pitch*Math.PI/180),rotY(-yaw*Math.PI/180));
-const shade=n=>clamp(Nm[6]*n[0]+Nm[7]*n[1]+Nm[8]*n[2],0,1);
-function render(){
-  orbit.style.transform='matrix3d('+orbitM().join(',')+')';
-  for(const c of simulate(pos,flip)){
-    const M=c.M,tr='matrix3d('+M[0]+','+M[3]+','+M[6]+',0,'+M[1]+','+M[4]+','+M[7]+',0,'+M[2]+','+M[5]+','+M[8]+',0,'+c.p[0]+','+c.p[1]+','+c.p[2]+',1)';
-    for(const side of ['f','b']){
-      const u=cells[c.id+side];u.el.style.transform=tr;
-      const l=Math.abs(shade([M[2],M[5],M[8]])*(side==='b'?-1:1));
-      u.el.style.setProperty('--sh',(0.34-0.30*l).toFixed(3));
-      u.el.style.setProperty('--hi',(0.02+0.15*l).toFixed(3));
-    }
-  }
-  paintFaces();renderHud();
-  const pe=document.getElementById('pos');
-  pe.style.setProperty('--p',(pos/2*100).toFixed(1)+'%');
-  document.getElementById('posLbl').textContent=pos<.004?'flat':pos>1.996?'4 layers':'folding…';
-  document.getElementById('flipLbl').textContent=flip>.5?'reverse side up':'printed side up';
-  const g=1-clamp(pos/1.4,0,1);
-  document.getElementById('ghost').style.opacity=(g*.9+.1).toFixed(2);
-  document.getElementById('guides').style.opacity=g.toFixed(2);
-}
-function paintFaces(){
-  for(const f of ALL8){
-    const u=cells[f],L=loads[f],l=u.f.querySelector('.load');
-    u.f.classList.toggle('used',L.size>0);
-    u.f.classList.toggle('hasload',L.size>0);
-    u.f.classList.toggle('hi',hi===f);
-    u.f.classList.toggle('spoil',L.size>1);
-    if(L.size){l.style.background=Z[[...L][0]].c;
-      l.textContent=L.size>1?[...L].map(z=>Z[z].n.split(' ')[0]).join('+'):Z[[...L][0]].n;}
-    const s=plan.find(p=>p.use===f);
-    if(s)u.f.querySelector('.zname').textContent=s.no+'. '+Z[s.zone].n;
-  }
-  document.querySelectorAll('#tbody tr').forEach(tr=>{
-    tr.classList.toggle('done',loads[tr.dataset.face].size>0);
-    tr.classList.toggle('now',hi===tr.dataset.face);
-  });
-}
-function renderHud(){
-  const info=stateInfo(clamp(Math.round(pos),0,2),Math.round(flip));
-  const layers=pos<.004?1:pos<1.996?2:4;
-  const t=pos<.004?'<b>Flat</b> — 4 faces up, 4 down, all 8 reachable'
-    :pos>1.996?'<b>Folded</b> — 4 layers, one quarter-size packet'
-    :'<b>'+FOLDS[clamp(Math.floor(pos),0,1)].name+'</b> — '+Math.round(clamp(pos-Math.floor(pos),0,1)*100)+'%';
-  const fts=info.map(g=>g.top+'↑ '+g.bot+'↓').join(' · ');
-  hud.innerHTML='<div class="chip">'+t+'</div><div class="chip">'+info.length+' footprint'+(info.length>1?'s':'')+
-   ' · '+layers+' layer'+(layers>1?'s':'')+' · '+fts+'</div>'+
-   (stats.press?'<div class="chip warn"><b>'+stats.press+'</b> clean face'+(stats.press>1?'s':'')+' contaminated by pressing</div>':'')+
-   (stats.cross?'<div class="chip warn"><b>'+stats.cross+'</b> cross-contamination event'+(stats.cross>1?'s':'')+'</div>':'')+
-   (!stats.press&&!stats.cross&&order.length?'<div class="chip good">no contaminated transfer so far</div>':'');
-}
-function renderVerd(){
-  const un=new Set(order).size===order.length;
-  document.getElementById('verd').innerHTML=
-   '<span class="vc'+(order.length===8?' ok':'')+'">'+order.length+'/8 faces used</span>'+
-   '<span class="vc'+(order.length&&un?' ok':order.length?' no':'')+'">'+(order.length?(un?'no face reused':'FACE REUSED'):'—')+'</span>'+
-   '<span class="vc'+(stats.press?' no':' ok')+'">'+stats.press+' dirty→clean presses</span>'+
-   '<span class="vc'+(stats.cross?' no':' ok')+'">'+stats.cross+' cross-contamination</span>'+
-   (surface.size?'<span class="vc no">surface holds '+[...surface].map(z=>Z[z].n.split(' ')[0]).join('+')+'</span>':'');
-}
-function renderLog(){
-  document.getElementById('log').innerHTML=log.slice(-9).reverse()
-   .map(r=>'<div class="'+r[1]+'">'+r[0]+'</div>').join('');
-}
-
-/* ═════ 8. PROTOCOL RUNNER ═════ */
-let tok=0,timer=null;
-const stop=()=>{clearTimeout(timer);tok++;};
-function goStep(){
-  const my=++tok;
-  if(poseIdx>=plan.length-1){hi=null;paintFaces();renderHud();return;}
-  poseIdx++;
-  const s=plan[poseIdx];
-  posT=s.k;flipT=s.f;contactPass(s.k,s.f);
-  if(s.use){
-    hi=s.use;paintFaces();markBody(s.zone);paintMap(poseIdx);
-    const el=cells[s.use].f;el.classList.add('wiping');
-    timer=setTimeout(()=>{
-      if(my!==tok)return;
-      el.classList.remove('wiping');wipe(s.use,s.zone,true);
-      say('<b>'+s.no+'/8</b> — '+s.use+' wiped with '+
-          Z[s.zone].n.toLowerCase()+'. '+(s.act||''),'ok');
-      hi=null;paintFaces();renderHud();
-      timer=setTimeout(()=>{if(my===tok)goStep();},800);
-    },1750);
-  } else {
-    say('<b>—</b> '+s.act);hi=null;paintFaces();renderHud();
-    timer=setTimeout(()=>{if(my===tok)goStep();},1400);
-  }
-}
-function startRun(){
-  stop();resetEngine();poseIdx=-1;posT=0;flipT=0;contactPass(0,0);
-  hi=null;paintFaces();paintMap(-1);markBody(null);
-  timer=setTimeout(goStep,500);
-}
-
-/* ═════ 9. CONTROLS ═════ */
-const $=id=>document.getElementById(id),posEl=$('pos'),surfSel=$('surfLoad'),restBox=$('rest');
-$('run').onclick=startRun;
-$('next').onclick=()=>{stop();if(poseIdx<0){resetEngine();contactPass(0,0);}goStep();};
-$('flip').onclick=()=>{stop();flipT=flipT>.5?0:1;const f=Math.round(flipT);
- setTimeout(()=>contactPass(clamp(Math.round(posT),0,2),f),750);};
-$('foldAll').onclick=()=>{stop();posT=2;setTimeout(()=>contactPass(2,Math.round(flipT)),950);};
-$('flat').onclick=()=>{stop();posT=0;setTimeout(()=>contactPass(0,Math.round(flipT)),950);};
-$('reset').onclick=()=>{stop();pos=posT=0;flip=flipT=0;yaw=-18;pitch=56;scale=1;
- poseIdx=-1;hi=null;resetEngine();contactPass(0,0);paintMap(-1);markBody(null);};
-posEl.oninput=e=>{stop();posT=pos=+e.target.value;contactPass(clamp(Math.round(posT),0,2),Math.round(flipT));};
-$('tgCrease').onchange=e=>cloth.classList.toggle('show-creases',e.target.checked);
-$('tgSpin').onchange=e=>{spin=e.target.checked;};
-restBox.onchange=e=>{
-  resting=e.target.checked;
-  surface=new Set(resting&&surfSel.value?[surfSel.value]:[]);
-  if(resting)say('<b>Set-down mode.</b> Whatever the packet rests on is now part of the contamination path.','no');
-  else{say('Hovering — there is no surface under the cloth.','ok');renderVerd();}
+const $=s=>document.querySelector(s);
+const stage=$('#stage'),scene=$('#scene'),flipper=$('#flipper'),shifter=$('#shifter');
+const P={A:$('#pA'),B:$('#pB'),C:$('#pC'),D:$('#pD')};
+const GRID={A:[0,0],B:[1,0],C:[0,1],D:[1,1]};
+const ZONES={
+  lcheek:{name:'left cheek', short:'L cheek',rgb:[212,104,104]},
+  rcheek:{name:'right cheek',short:'R cheek',rgb:[226,142,74]},
+  nose:  {name:'nose',       short:'nose',   rgb:[196,158,48]},
+  hands: {name:'hands',      short:'hands',  rgb:[84,140,118]}
 };
-surfSel.onchange=e=>{
-  if(resting){surface=new Set(e.target.value?[e.target.value]:[]);
-    say(e.target.value?'<b>Surface is dirty</b> — it already carries '+Z[e.target.value].n.toLowerCase()+'.'
-                     :'Surface is clean.','no');}
-  renderVerd();
-};
-$('preset').onchange=e=>{preset=e.target.value;stop();poseIdx=-1;
-  buildPlan();buildBody();zonePicker();sizing();markBody(null);paintMap(-1);};
-$('size').onchange=e=>{size=+e.target.value;sizing();fitBars();};
-$('zpick').onclick=e=>{const c=e.target.closest('.zc');if(!c)return;
-  zonePick=c.dataset.z;zonePicker();markBody(zonePick);};
-$('tbody').onclick=e=>{const tr=e.target.closest('tr');if(!tr)return;
-  const s=plan.find(p=>p.use===tr.dataset.face);if(!s)return;
-  stop();poseIdx=s.i-1;goStep();};
-let dragged=false;
-cloth.addEventListener('click',e=>{
-  if(dragged){dragged=false;return;}
-  const f=e.target.closest('.f');if(!f)return;
-  stop();wipe(f.dataset.face,zonePick);
-  const s=plan.find(p=>p.use===f.dataset.face);
-  hi=s?s.use:null;paintFaces();markBody(zonePick);
-  paintMap(Math.max.apply(null,plan.filter(p=>p.use&&loads[p.use].size).map(p=>p.i).concat([-1])));
+const rgb=(z,a=1)=>`rgba(${ZONES[z].rgb.join(',')},${a})`;
+
+/* steps: ph = fold states in order; w = wipe {zone, faces:[id, x%, y%, rx%, ry%]} */
+const STEPS=[
+ {k:'square',t:'A square, hovering',
+  d:'Two sides: the <em>inner</em> side (ivory) and the <em>outer</em> side (blue hem). There is nothing under it. Cloth only gets dirty where it is rubbed.',
+  ph:[{f1:0,f2:0,flip:0}]},
+ {k:'fold',t:'Fold once',
+  d:'Left half over right. The inner side folds onto itself: clean against clean, put away for later.',
+  ph:[{f1:1,f2:0,flip:0}]},
+ {k:'fold',t:'Fold twice',
+  d:'Top over bottom. Now it is a four-layer packet with only two faces showing, one on top and one underneath.',
+  ph:[{f1:1,f2:1,flip:0}]},
+ {k:'L cheek',t:'Left cheek',
+  d:'Wipe with the top face of the packet, one quarter of the outer side.',
+  ph:[{f1:1,f2:1,flip:0}],w:{z:'lcheek',f:[['Bb',50,50,36,32]]}},
+ {k:'R cheek',t:'Right cheek',
+  d:'Turn the packet over in mid-air. The underside hasn\u2019t touched anything yet. That is the second quarter.',
+  ph:[{f1:1,f2:1,flip:1}],w:{z:'rcheek',f:[['Db',50,50,36,32]]}},
+ {k:'nose',t:'Nose',
+  d:'Turn it back and open the second fold. The two quarters that were pressed together inside now make one tall clean strip, about the shape of a nose. Both used cheek faces now point away, underneath.',
+  ph:[{f1:1,f2:1,flip:0},{f1:1,f2:0,flip:0}],w:{z:'nose',f:[['Ab',50,100,22,80],['Cb',50,0,22,80]]}},
+ {k:'hands',t:'Hands',
+  d:'Open it fully. The whole inner side has been sealed since the first fold, so it is untouched. Hands go last: the biggest area and the dirtiest job.',
+  ph:[{f1:0,f2:0,flip:0}],w:{z:'hands',f:[['Af',100,100,92,92],['Bf',0,100,92,92],['Cf',100,0,92,92],['Df',0,0,92,92]]}},
+ {k:'done',t:'Every face, once',
+  d:'Turn it over. Four quarters of the outer side and four of the inner side, used as ¼ + ¼ + ½ + 1. No surface was touched twice, and nothing used ever pressed against clean cloth.',
+  ph:[{f1:0,f2:0,flip:1}]}
+];
+
+/* ── build cloth faces ── */
+const faces={};
+for(const p of 'ABCD')for(const side of ['f','b']){
+  const [c,r]=GRID[p],el=document.createElement('div');
+  el.className='face '+(side==='f'?'inner':'outer');
+  let top=r===0,bottom=r===1,left=c===0,right=c===1;
+  if(side==='b')[left,right]=[right,left];            // back face is mirrored
+  const g=9,hem=document.createElement('i');hem.className='hem';
+  hem.style.cssText=`top:${top?g:-4}px;bottom:${bottom?g:-4}px;left:${left?g:-4}px;right:${right?g:-4}px;`+
+    `border-width:${top?3:0}px ${right?3:0}px ${bottom?3:0}px ${left?3:0}px`;
+  const stain=document.createElement('div');stain.className='stain';
+  const brush=document.createElement('div');brush.className='brush';
+  el.append(hem,stain,brush);
+  if(p+side==='Af')el.insertAdjacentHTML('beforeend',
+    '<svg class="mono" viewBox="0 0 20 20"><path d="M10 2V18M2 10H18M4.5 4.5L15.5 15.5M15.5 4.5L4.5 15.5"/></svg>');
+  P[p].prepend(el);
+  faces[p+side]={el,stain,brush};
+}
+
+/* ── fold state → transforms ── */
+let live={f1:0,f2:0,flip:0},sz=130;
+function apply(st){
+  live={...st};
+  const rY=`rotateY(${180*st.f1}deg) translateZ(${-2*st.f1}px)`;
+  P.C.style.transform=rY;P.A.style.transform=rY;
+  P.B.style.transform=`rotateX(${-180*st.f2}deg) translateZ(${-6*st.f2}px)`;
+  flipper.style.transform=`rotateY(${180*st.flip}deg)`;
+  shifter.style.transform=`translate3d(${-(sz+sz/2*st.f1)}px,${-(sz+sz/2*st.f2)}px,0px)`;
+  renderLedger();renderChip();
+}
+function exposure(st){
+  let top,bot;
+  if(!st.f1){top=['Af','Bf','Cf','Df'];bot=['Ab','Bb','Cb','Db'];}
+  else if(!st.f2){top=['Ab','Cb'];bot=['Bb','Db'];}
+  else{top=['Bb'];bot=['Db'];}
+  if(st.flip)[top,bot]=[bot,top];
+  const out=new Set([...top,...bot]);
+  return{top:new Set(top),inside:Object.keys(faces).filter(f=>!out.has(f))};
+}
+
+/* ── stains ── */
+let usedNow=new Map(),activeZone=null;
+function usedUpTo(i){
+  const m=new Map();
+  for(let k=0;k<=i;k++){const w=STEPS[k].w;if(w)for(const[id,x,y,rx,ry]of w.f)m.set(id,{z:w.z,x,y,rx,ry});}
+  return m;
+}
+function stainBG(u){
+  const c=a=>rgb(u.z,a),at=`${u.x}% ${u.y}%`;
+  return `radial-gradient(ellipse ${u.rx}% ${u.ry}% at ${at},${c(.16)} 0%,${c(.26)} 58%,${c(.52)} 80%,${c(0)} 91%),`+
+         `radial-gradient(ellipse ${u.rx*.55}% ${u.ry*.55}% at ${at},${c(.2)} 0%,${c(0)} 100%)`;
+}
+function paintStains(m){
+  usedNow=m;
+  for(const id in faces){const u=m.get(id),s=faces[id].stain;
+    if(u){s.style.background=stainBG(u);s.classList.add('on');}else s.classList.remove('on');}
+  renderLedger();renderZones();renderTimeline();
+}
+function rub(w){
+  activeZone=w.z;
+  for(const[id]of w.f){const f=faces[id];
+    f.brush.style.background=`radial-gradient(circle at 50% 50%,rgba(255,255,255,.75) 0%,${rgb(w.z,.28)} 28%,rgba(255,255,255,0) 55%)`;
+    f.el.classList.remove('rub');void f.el.offsetWidth;f.el.classList.add('rub');}
+  renderZones();renderChip();
+}
+const clearRub=()=>{for(const id in faces)faces[id].el.classList.remove('rub');};
+
+/* ── side panel renders ── */
+const IN=['Af','Bf','Cf','Df'],OUT=['Bb','Ab','Db','Cb'];   // outer grid shown turned over
+const cellEls={};
+for(const[gid,ids]of[['#gIn',IN],['#gOut',OUT]])for(const id of ids){
+  const d=document.createElement('div');d.className='cell';$(gid).appendChild(d);cellEls[id]=d;}
+function renderLedger(){
+  const ex=exposure(live);
+  for(const id in cellEls){const d=cellEls[id],u=usedNow.get(id);
+    d.classList.toggle('top',ex.top.has(id));
+    d.classList.toggle('inside',ex.inside.includes(id));
+    d.classList.toggle('used',!!u);
+    d.style.background=u?rgb(u.z,.72):'';
+    d.textContent=u?ZONES[u.z].short:'';}
+  const reuse=Object.keys(faces).filter(id=>STEPS.slice(0,cur+1).filter(s=>s.w&&s.w.f.some(f=>f[0]===id)).length>1).length;
+  $('#count').innerHTML=`<b>${usedNow.size}</b> of 8 faces used · <b>${reuse}</b> touched twice`;
+}
+function renderZones(){
+  for(const z in ZONES){const el=document.getElementById('z-'+z);
+    const done=[...usedNow.values()].some(u=>u.z===z);
+    el.setAttribute('class','zone'+(done?' done':'')+(activeZone===z?' active':''));
+    el.style.setProperty('--c',rgb(z));}
+}
+function renderChip(){
+  const chip=$('#chip');
+  if(activeZone){chip.className='chip live';chip.style.setProperty('--c',rgb(activeZone));
+    chip.innerHTML=`<i></i>wiping: <b>${ZONES[activeZone].name}</b>`;return;}
+  const ex=exposure(live),n=8-ex.inside.length;
+  chip.className='chip';chip.innerHTML=`<b>${n}</b> faces exposed · <b>${ex.inside.length}</b> folded inside`;
+}
+const tl=$('#tl');
+STEPS.forEach((s,i)=>{const b=document.createElement('button');b.className='tick'+(s.w?' w':'');
+  if(s.w)b.style.setProperty('--c',rgb(s.w.z));
+  b.innerHTML='<span class="dot"></span><span>'+s.k+'</span>';
+  b.onclick=()=>{stopPlay();goTo(i,i===cur+1);};tl.appendChild(b);});
+function renderTimeline(){[...tl.children].forEach((b,i)=>{b.classList.toggle('past',i<=cur);b.classList.toggle('on',i===cur);});}
+function renderText(){
+  const s=STEPS[cur],now=$('#now');
+  $('#kick').textContent=`Step ${cur+1} of ${STEPS.length}`;$('#title').textContent=s.t;$('#desc').innerHTML=s.d;
+  now.classList.remove('fade');void now.offsetWidth;now.classList.add('fade');
+}
+
+/* ── sequencer ── */
+const DUR=1150;let cur=0,tok=0,timers=[],playing=false,playTimer=null;
+const same=(a,b)=>a.f1===b.f1&&a.f2===b.f2&&a.flip===b.flip;
+function later(ms,fn,my){timers.push(setTimeout(()=>{if(my===tok)fn();},ms));}
+function goTo(i,animate){
+  i=Math.max(0,Math.min(STEPS.length-1,i));
+  const my=++tok;timers.forEach(clearTimeout);timers=[];
+  cur=i;activeZone=null;clearRub();renderText();
+  const s=STEPS[i];
+  if(!animate){apply(s.ph[s.ph.length-1]);paintStains(usedUpTo(i));return 0;}
+  paintStains(usedUpTo(i-1));renderTimeline();
+  let t=0,prev={...live};
+  for(const ph of s.ph){if(!same(ph,prev)){later(t,()=>apply(ph),my);t+=DUR+140;}prev=ph;}
+  if(s.w){
+    later(t,()=>rub(s.w),my);
+    later(t+650,()=>paintStains(usedUpTo(i)),my);
+    later(t+1700,()=>{activeZone=null;clearRub();renderZones();renderChip();},my);
+    t+=1700;
+  }
+  return t;
+}
+function loop(){
+  if(!playing)return;
+  if(cur>=STEPS.length-1){stopPlay();return;}
+  const d=goTo(cur+1,true);playTimer=setTimeout(loop,d+1500);
+}
+function startPlay(){
+  playing=true;$('#play').textContent='❚❚';
+  if(cur>=STEPS.length-1){goTo(0,false);playTimer=setTimeout(loop,1500);}else loop();
+}
+function stopPlay(){playing=false;clearTimeout(playTimer);$('#play').textContent='▶';}
+$('#play').onclick=()=>playing?stopPlay():startPlay();
+$('#next').onclick=()=>{stopPlay();if(cur<STEPS.length-1)goTo(cur+1,true);};
+$('#prev').onclick=()=>{stopPlay();goTo(cur-1,false);};
+addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight')$('#next').click();
+  else if(e.key==='ArrowLeft')$('#prev').click();
+  else if(e.key===' '){e.preventDefault();$('#play').click();}
 });
 
-/* ═════ 10. ORBIT + LOOP ═════ */
-let drag=null;
-stage.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,moved:0};
- stage.classList.add('drag');stage.setPointerCapture(e.pointerId);});
+/* ── tilt by dragging ── */
+let tx=54,tz=-12,drag=null;
+const orient=()=>{scene.style.transform=`rotateX(${tx}deg) rotateZ(${tz}deg)`;};
+stage.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};stage.classList.add('drag');stage.setPointerCapture(e.pointerId);});
 stage.addEventListener('pointermove',e=>{if(!drag)return;
- drag.moved+=Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y);
- yaw-=(e.clientX-drag.x)*.42;pitch=clamp(pitch-(e.clientY-drag.y)*.42,-88,88);
- drag={x:e.clientX,y:e.clientY,moved:drag.moved};});
-const endDrag=()=>{if(drag&&drag.moved>6)dragged=true;drag=null;stage.classList.remove('drag');};
-stage.addEventListener('pointerup',endDrag);stage.addEventListener('pointercancel',endDrag);
-stage.addEventListener('wheel',e=>{e.preventDefault();
- scale=clamp(scale*(e.deltaY>0?.94:1.06),.35,2.4);},{passive:false});
-const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-let last=performance.now();
-function tick(now){
-  const dt=Math.min(50,now-last);last=now;
-  if(spin)yaw+=dt*.012;
-  const k=reduce?1:1-Math.pow(.0016,dt/1000);
-  pos+=(posT-pos)*k;flip+=(flipT-flip)*k;
-  if(Math.abs(posT-pos)<.0006)pos=posT;
-  if(Math.abs(flipT-flip)<.0006)flip=flipT;
-  render();requestAnimationFrame(tick);
-}
+  tz-=(e.clientX-drag.x)*.35;tx=Math.max(0,Math.min(80,tx-(e.clientY-drag.y)*.35));
+  drag={x:e.clientX,y:e.clientY};orient();});
+const end=()=>{drag=null;stage.classList.remove('drag');};
+stage.addEventListener('pointerup',end);stage.addEventListener('pointercancel',end);
 
-/* ═════ 11. BOOT ═════ */
-$('hNote').innerHTML='<b>Hovering is the whole trick.</b> In the air the only transfer left is face against '+
- 'face — and the two-fold never buries a face you have already used. Turn set-down on and the plan '+
- 'breaks within two steps.';
-buildPlan();buildBody();zonePicker();sizing();renderVerd();paintMap(-1);markBody(null);
-contactPass(0,0);
-requestAnimationFrame(tick);
+/* ── sizing ── */
+function fit(){
+  sz=Math.round(Math.max(78,Math.min(150,stage.clientWidth*.2,stage.clientHeight*.27)));
+  document.documentElement.style.setProperty('--s',sz+'px');
+  stage.classList.add('instant');apply(live);void stage.offsetWidth;stage.classList.remove('instant');
+}
+addEventListener('resize',fit);
+if(matchMedia('(prefers-reduced-motion: reduce)').matches)
+  document.documentElement.style.setProperty('--dur','.35s');
+
+orient();fit();goTo(0,false);
 </script>
 </body>
 </html>

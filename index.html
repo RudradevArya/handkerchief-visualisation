@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The 8-Fold — a cloth you never touch the dirty side of</title>
+<style>
+:root{
+  --bg:#080b10; --panel:#111923; --panel2:#0d141c;
+  --line:#1e2a36; --line2:#2b3b4b;
+  --ink:#e7eff6; --mut:#8ba0b4; --dim:#5d6f81;
+  --clean:#14b8a6; --dirty:#ef6a4c; --gold:#fbbf24; --blue:#60a5fa;
+  --r:13px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--ink);
+  background:radial-gradient(1300px 900px at 50% -12%,#17222e 0%,var(--bg) 62%);
+  font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.app{max-width:1320px;margin:0 auto;padding:26px 22px 60px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;margin-bottom:22px}
+h1{font-size:26px;letter-spacing:-.02em;margin:0;font-weight:650}
+h1 em{font-style:normal;color:var(--clean)}
+.tag{margin:0;color:var(--mut);font-size:14.5px}
+.dot{width:11px;height:11px;border-radius:3px;background:linear-gradient(135deg,var(--clean),var(--dirty));
+  display:inline-block;margin-right:11px;transform:translateY(1px)}
+
+main{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:22px;align-items:start}
+@media(max-width:1000px){main{grid-template-columns:1fr}}
+
+/* ---------- stage ---------- */
+.stage-col{background:var(--panel2);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.stage{
+  position:relative; height:min(66vh,560px); min-height:380px;
+  perspective:1500px; perspective-origin:50% 46%;
+  background:radial-gradient(900px 500px at 50% 30%,#111b24,#0a0e14 75%);
+  cursor:grab; touch-action:none; overflow:hidden;
+}
+.stage.drag{cursor:grabbing}
+.orbit{position:absolute;left:50%;top:50%;width:480px;height:320px;margin:-160px 0 0 -240px;
+  transform-style:preserve-3d}
+.cloth{position:absolute;inset:0;transform-style:preserve-3d}
+
+.mat{position:absolute;left:0;top:0;width:608px;height:448px;border-radius:12px;
+  transform:translate(-64px,-64px) translateZ(-5px);
+  background:
+    linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px) 0 0/40px 40px,
+    linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px) 0 0/40px 40px,
+    linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px) 0 0/200px 200px,
+    linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px) 0 0/200px 200px,
+    #101a22;
+  border:1px solid rgba(255,255,255,.09);
+  box-shadow:0 40px 70px rgba(0,0,0,.55), inset 0 0 60px rgba(0,0,0,.4);
+}
+.guides{position:absolute;left:0;top:0;width:480px;height:320px;transform-style:preserve-3d;
+  transition:opacity .4s; pointer-events:none}
+.gl{position:absolute;background:repeating-linear-gradient(var(--dir,90deg),
+  var(--gold) 0 7px,transparent 7px 14px);opacity:.5}
+.gv{--dir:90deg;width:2px;top:-40px;height:400px}
+.gh{--dir:180deg;height:2px;left:-40px;width:560px}
+.badge{position:absolute;width:23px;height:23px;border-radius:50%;display:grid;place-items:center;
+  font-size:12px;font-weight:700;color:#0a0f14;background:var(--gold);
+  box-shadow:0 0 0 4px rgba(251,191,36,.16);transform:translateZ(-.1px)}
+
+.cell{position:absolute;left:0;top:0;width:120px;height:160px;transform-origin:0 0;
+  transform-style:preserve-3d;--sh:.28;--hi:.07}
+.f{position:absolute;inset:0;backface-visibility:hidden;border-radius:3px;overflow:hidden;
+  display:grid;place-items:center;border:1px dashed transparent;
+  box-shadow:0 1px 0 rgba(255,255,255,.06) inset}
+.f::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(rgba(255,255,255,var(--hi)),rgba(255,255,255,0)),
+             rgba(3,8,14,var(--sh))}
+.show-creases .f{border-color:rgba(255,255,255,.22)}
+.f-front{background:
+  repeating-linear-gradient(45deg,rgba(255,255,255,.055) 0 7px,transparent 7px 14px),
+  linear-gradient(158deg,#22c3b0,#0e9189 55%,#0a6b73);color:#eafffb}
+.f-back{transform:rotateY(180deg);background:
+  repeating-linear-gradient(45deg,rgba(0,0,0,.17) 0 6px,rgba(255,255,255,.05) 6px 12px),
+  linear-gradient(158deg,#f0744f,#c7452c 55%,#8d2e1f);color:#ffeee7}
+.f b{font-size:34px;font-weight:700;letter-spacing:-.03em;opacity:.92;
+  text-shadow:0 2px 10px rgba(0,0,0,.35)}
+.f-back b{font-size:24px;opacity:.55}
+.f i{position:absolute;bottom:7px;left:0;right:0;text-align:center;font-style:normal;
+  font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;opacity:.62}
+.f.hi{outline:3px solid var(--gold);outline-offset:-3px}
+.f.used{filter:grayscale(.85) brightness(.5)}
+.f.used::before{content:"";position:absolute;inset:0;
+  background:repeating-conic-gradient(rgba(0,0,0,.3) 0 25%,rgba(255,255,255,.09) 0 50%) 0 0/14px 14px}
+
+.hud{position:absolute;left:16px;top:14px;z-index:5;display:flex;flex-direction:column;gap:6px;
+  pointer-events:none}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;
+  background:rgba(9,14,20,.78);border:1px solid var(--line2);font-size:12.5px;color:var(--mut);
+  backdrop-filter:blur(8px);width:fit-content}
+.chip b{color:var(--ink);font-weight:600}
+.chip.warn{border-color:#7c3a12;background:rgba(60,22,8,.8);color:#fdba74}
+.hint{position:absolute;right:16px;bottom:14px;z-index:5;font-size:11.5px;color:var(--dim);
+  pointer-events:none;letter-spacing:.02em}
+
+/* ---------- transport ---------- */
+.transport{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:14px 16px;
+  border-top:1px solid var(--line);background:#0c131a}
+button{font:inherit;font-size:13.5px;font-weight:550;color:var(--ink);cursor:pointer;
+  background:#18232e;border:1px solid var(--line2);border-radius:9px;padding:8px 14px;
+  transition:.14s}
+button:hover{background:#22303d;border-color:#3b5063}
+button:active{transform:translateY(1px)}
+button.pri{background:linear-gradient(180deg,#17b3a2,#0e8c81);border-color:#12a091;color:#02201d;font-weight:650}
+button.pri:hover{background:linear-gradient(180deg,#1cc4b2,#12a091)}
+button:disabled{opacity:.4;cursor:not-allowed}
+.spacer{flex:1}
+.scrub{padding:0 16px 16px;background:#0c131a;border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:14px}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:5px;border-radius:99px;
+  background:linear-gradient(90deg,var(--clean) var(--p,0%),#1e2a36 var(--p,0%));outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;
+  background:#eafffb;border:3px solid var(--clean);cursor:grab;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:#eafffb;
+  border:3px solid var(--clean);cursor:grab}
+.mini{font-size:12px;color:var(--dim);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* ---------- panel ---------- */
+.panel{display:flex;flex-direction:column;gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 17px}
+.card h2{margin:0 0 4px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:650}
+.card p{margin:8px 0 0;font-size:13.5px;color:var(--mut)}
+.legend{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--mut)}
+.sw{width:15px;height:15px;border-radius:4px}
+.sw.c{background:linear-gradient(150deg,#22c3b0,#0a6b73)}
+.sw.d{background:linear-gradient(150deg,#f0744f,#8d2e1f)}
+ol.steps{margin:10px 0 0;padding:0;list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;position:relative;padding:9px 0 9px 34px;font-size:13.5px;
+  color:var(--mut);border-bottom:1px dashed var(--line)}
+ol.steps li:last-child{border-bottom:0}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:9px;width:21px;height:21px;
+  border-radius:6px;background:#1b2734;color:var(--ink);display:grid;place-items:center;
+  font-size:11.5px;font-weight:700}
+ol.steps li b{color:var(--ink);font-weight:600}
+
+table.surf{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+table.surf th{text-align:left;font-weight:600;color:var(--dim);font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;padding:0 6px 7px}
+table.surf td{padding:7px 6px;border-top:1px solid var(--line);color:var(--mut);
+  font-variant-numeric:tabular-nums}
+table.surf tr{cursor:pointer;transition:.12s}
+table.surf tr:hover td{background:#16202a;color:var(--ink)}
+table.surf tr.on td{background:#1d2b23;color:var(--ink)}
+table.surf tr.done td{color:#5d6f81}
+table.surf tr.done .n{text-decoration:line-through}
+.n{width:20px;height:20px;border-radius:5px;display:inline-grid;place-items:center;
+  font-size:11px;font-weight:700;color:#0b1116}
+.n.c{background:var(--clean)} .n.d{background:var(--dirty)}
+.risk{color:#fdba74}
+.tog{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tog label{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--mut);
+  background:#151f29;border:1px solid var(--line);border-radius:8px;padding:7px 11px;cursor:pointer;
+  user-select:none}
+.tog input{accent-color:var(--clean);margin:0}
+.note{border-color:#3b2a16;background:linear-gradient(180deg,#1c160e,#12100c)}
+.note h2{color:#d9a441}
+.note p{color:#c3ae8c}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1><span class="dot"></span>The <em>8-Fold</em></h1>
+    <p class="tag">A handkerchief folded in half, in half, in half — so you only ever touch the clean side.</p>
+  </header>
+
+  <main>
+    <!-- ============ STAGE ============ -->
+    <section class="stage-col">
+      <div class="stage" id="stage">
+        <div class="hud" id="hud"></div>
+        <div class="orbit" id="orbit">
+          <div class="mat"></div>
+          <div class="guides" id="guides">
+            <div class="gl gv" style="left:240px"></div>
+            <div class="gl gh" style="top:160px"></div>
+            <div class="gl gv" style="left:360px"></div>
+            <div class="badge" style="left:228px;top:-52px">1</div>
+            <div class="badge" style="left:348px;top:-52px">3</div>
+            <div class="badge" style="left:-52px;top:148px">2</div>
+            <div class="badge" style="left:508px;top:148px">2</div>
+          </div>
+          <div class="cloth" id="cloth"></div>
+        </div>
+        <div class="hint">drag to orbit · scroll to zoom</div>
+      </div>
+
+      <div class="transport">
+        <button class="pri" id="foldAll">Fold all 3</button>
+        <button id="stepF">Fold ①</button>
+        <button id="stepB">Unfold ①</button>
+        <button id="unfoldAll">Unfold</button>
+        <div class="spacer"></div>
+        <button id="run">▶ Run the 8-surface wipe</button>
+        <button id="reset">Reset view</button>
+      </div>
+      <div class="scrub">
+        <span class="mini" id="posLbl">flat</span>
+        <input type="range" id="pos" min="0" max="3" step="0.005" value="0">
+        <span class="mini" id="layerLbl">1 layer</span>
+      </div>
+    </section>
+
+    <!-- ============ PANEL ============ -->
+    <aside class="panel">
+      <div class="card">
+        <h2>The fold</h2>
+        <p>One clean rectangle, three creases, <b style="color:var(--ink)">eight layers</b>. Each layer
+           keeps a fixed teal face up and a fixed coral face down — folding never swaps them.</p>
+        <div class="legend">
+          <span><i class="sw c"></i> clean side — safe to touch</span>
+          <span><i class="sw d"></i> dirty side — never handled</span>
+        </div>
+        <ol class="steps">
+          <li><b>Left half → right half.</b> 2 layers.</li>
+          <li><b>Top half → bottom half.</b> 4 layers.</li>
+          <li><b>Left quarter → right quarter.</b> 8 layers, an eighth of the area.</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h2>Working the 8 surfaces</h2>
+        <table class="surf">
+          <thead><tr><th></th><th>Face</th><th>To reach it</th></tr></thead>
+          <tbody id="surfBody"></tbody>
+        </table>
+        <p id="surfNote" style="font-size:12.5px"></p>
+      </div>
+
+      <div class="card">
+        <h2>View</h2>
+        <div class="tog">
+          <label><input type="checkbox" id="tgCrease" checked> crease guides</label>
+          <label><input type="checkbox" id="tgSpin"> slow orbit</label>
+          <label><input type="checkbox" id="tgNum" checked> numbers</label>
+        </div>
+      </div>
+
+      <div class="card note">
+        <h2>The honest bit</h2>
+        <p>The 8-fold is compact and it does keep the dirty side sealed inside — but to get past the
+           first two surfaces you have to <b>open the cloth again</b>, which re-exposes what you already
+           wiped. Watch the <b class="risk">used faces on the table</b> counter climb as you open.
+           A <b>roll fold</b> avoids this entirely: one continuous pass, 100% of the area, nothing
+           ever re-exposed.</p>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<script>
+"use strict";
+/* ============================== MATH ============================== */
+const CW=120, CH=160, T=0.9;                 // panel size + layer thickness
+const I3=()=>[1,0,0, 0,1,0, 0,0,1];
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+function mul(A,B){const C=new Array(9);
+  for(let r=0;r<3;r++)for(let c=0;c<3;c++)
+    C[r*3+c]=A[r*3]*B[c]+A[r*3+1]*B[3+c]+A[r*3+2]*B[6+c];
+  return C;}
+const rotY=a=>{const c=Math.cos(a),s=Math.sin(a);return [c,0,s, 0,1,0, -s,0,c];};
+const rotX=a=>{const c=Math.cos(a),s=Math.sin(a);return [1,0,0, 0,c,-s, 0,s,c];};
+const app3=(M,v)=>[M[0]*v[0]+M[1]*v[1]+M[2]*v[2],
+                    M[3]*v[0]+M[4]*v[1]+M[5]*v[2],
+                    M[6]*v[0]+M[7]*v[1]+M[8]*v[2]];
+const center=c=>[c.p[0]+(c.M[0]*CW/2+c.M[1]*CH/2),
+                 c.p[1]+(c.M[3]*CW/2+c.M[4]*CH/2),
+                 c.p[2]+(c.M[6]*CW/2+c.M[7]*CH/2)];
+
+/* ========================== FOLD MODEL ============================ */
+const FOLDS=[
+  {axis:'y', c:2*CW, name:'Fold 1 — left half onto right half'},
+  {axis:'x', c:1*CH, name:'Fold 2 — top half onto bottom half'},
+  {axis:'y', c:3*CW, name:'Fold 3 — left quarter onto right quarter'},
+];
+
+/* pos: 0..3 continuous.  flip: 0..2 (1 = packet turned over, 2 = identity again) */
+function simulate(pos, flip){
+  const cells=[];
+  for(let i=0;i<4;i++) for(let j=0;j<2;j++)
+    cells.push({id:i*2+j+1, i, j, M:I3(), p:[i*CW, j*CH, 0]});
+
+  for(let k=0;k<3;k++){
+    const u=clamp(pos-k,0,1);
+    if(u<=1e-6) break;
+    const f=FOLDS[k];
+    /* moving set is read from the PRE-fold state, which is identical every frame
+       (all earlier creases are fully closed by the time crease k animates)   */
+    const info=cells.map(c=>({c, ctr:center(c)}));
+    const mv=info.filter(o=> f.axis==='y' ? o.ctr[0] < f.c-0.01 : o.ctr[1] < f.c-0.01);
+    const st=info.filter(o=> mv.indexOf(o)<0);
+    if(!mv.length) break;
+
+    /* hinge height: flap must land exactly on top of the stationary stack */
+    const maxM=Math.max(...mv.map(o=>o.ctr[2]));
+    const maxS=st.length?Math.max(...st.map(o=>o.ctr[2])):0;
+    const h=(maxM+maxS+T)/2;
+
+    const R = f.axis==='y' ? rotY( Math.PI*u) : rotX(-Math.PI*u);
+    for(const o of mv){
+      const q = f.axis==='y' ? [f.c, o.ctr[1], h] : [o.ctr[0], f.c, h];
+      const Rp=app3(R,o.c.p), Rq=app3(R,q);
+      o.c.M = mul(R,o.c.M);
+      o.c.p = [Rp[0]+q[0]-Rq[0], Rp[1]+q[1]-Rq[1], Rp[2]+q[2]-Rq[2]];
+    }
+  }
+
+  if(flip>1e-6){                               // rigid 180° tumble of the whole cloth
+    const ys=cells.map(c=>center(c)[1]);
+    const q=[0,(Math.min(...ys)+Math.max(...ys))/2,0];
+    const R=rotX(-Math.PI*flip), Rq=app3(R,q);
+    for(const c of cells){
+      const Rp=app3(R,c.p);
+      c.M=mul(R,c.M);
+      c.p=[Rp[0]+q[0]-Rq[0], Rp[1]+q[1]-Rq[1], Rp[2]+q[2]-Rq[2]];
+    }
+  }
+  return cells;
+}
+
+const faceId=(cell,side)=>cell+(side==='front'?'f':'b');
+const keyOf=ctr=>Math.round(ctr[0]/CW)+','+Math.round(ctr[1]/CH);
+
+function stackFaces(k,flip,which){            // 'top' | 'bottom'
+  const cells=simulate(k,flip), g=new Map();
+  for(const c of cells){
+    const ctr=center(c), key=keyOf(ctr);
+    if(!g.has(key)) g.set(key,[]);
+    g.get(key).push({c, z:ctr[2]});
+  }
+  const out=[];
+  for(const [key,arr] of g){
+    arr.sort((a,b)=>b.z-a.z);
+    const pick = which==='top' ? arr[0].c : arr[arr.length-1].c;
+    const up = pick.M[8] > 0;                 // local +z (front) points at viewer
+    const side = which==='top' ? (up?'front':'back') : (up?'back':'front');
+    out.push({key, cell:pick.id, side});
+  }
+  out.sort((a,b)=>{const A=a.key.split(',').map(Number),B=b.key.split(',').map(Number);
+                   return A[1]-B[1]||A[0]-B[0];});
+  return out;
+}
+
+/* ============================== BUILD DOM ========================= */
+const cloth=document.getElementById('cloth');
+const cells=[];
+for(let i=0;i<4;i++) for(let j=0;j<2;j++){
+  const id=i*2+j+1;
+  const el=document.createElement('div');
+  el.className='cell';
+  el.innerHTML=`<div class="f f-front" data-side="front"><b>${id}</b><i>clean</i></div>
+                <div class="f f-back"  data-side="back"><b>${id}</b><i>underside</i></div>`;
+  cloth.appendChild(el);
+  cells.push({id, el, front:el.querySelector('.f-front'), back:el.querySelector('.f-back')});
+}
+const byId=Object.fromEntries(cells.map(c=>[c.id,c]));
+
+/* ============================== STATE ============================= */
+let pos=0, posT=0, flip=0, flipT=0, spin=false;
+let yaw=-20, pitch=54, scale=1;
+let used=new Set(), hiFaces=[], stepIdx=-1, runTimer=null;
+
+const orbit=document.getElementById('orbit'), stage=document.getElementById('stage');
+const posEl=document.getElementById('pos'), hud=document.getElementById('hud');
+const guides=document.getElementById('guides');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function orbitMatrix(){
+  const s=scale, m=mul(rotX(pitch*Math.PI/180), rotY(yaw*Math.PI/180));
+  return [m[0]*s,m[3]*s,m[6]*s,0, m[1]*s,m[4]*s,m[7]*s,0, m[2]*s,m[5]*s,m[8]*s,0, 0,0,0,1];
+}
+/* normals → view space so panels darken as they tip away from you */
+const Nm=mul(rotX(-pitch*Math.PI/180), rotY(-yaw*Math.PI/180));
+const shade=n=>clamp((Nm[6]*n[0]+Nm[7]*n[1]+Nm[8]*n[2]),0,1);
+
+/* ============================== RENDER ============================ */
+function render(){
+  orbit.style.transform='matrix3d('+orbitMatrix().join(',')+')';
+  const st=simulate(pos,flip);
+  for(let n=0;n<st.length;n++){
+    const c=st[n], ui=byId[c.id], M=c.M;
+    ui.el.style.transform=
+      `matrix3d(${M[0]},${M[3]},${M[6]},0, ${M[1]},${M[4]},${M[7]},0, ${M[2]},${M[5]},${M[8]},0, ${c.p[0]},${c.p[1]},${c.p[2]},1)`;
+    const lit=shade([M[2],M[5],M[8]]);        // >0 front toward viewer
+    const l=lit>0?lit:-lit;
+    ui.el.style.setProperty('--sh',(0.34-0.30*l).toFixed(3));
+    ui.el.style.setProperty('--hi',(0.02+0.16*l).toFixed(3));
+  }
+  paintFaces();
+  paintHud();
+  posEl.style.setProperty('--p',(pos/3*100).toFixed(1)+'%');
+}
+
+/* ============================ FACE STATE ========================== */
+function faceEl(cell,side){ return side==='front'?byId[cell].front:byId[cell].back; }
+function paintFaces(){
+  cells.forEach(c=>{
+    c.front.classList.toggle('used', used.has(faceId(c.id,'front')));
+    c.back .classList.toggle('used', used.has(faceId(c.id,'back')));
+    c.front.classList.toggle('hi', hiFaces.includes(faceId(c.id,'front')));
+    c.back .classList.toggle('hi', hiFaces.includes(faceId(c.id,'back')));
+  });
+}
+function paintHud(){
+  const k=Math.min(3,Math.floor(pos+1e-4)), u=clamp(pos-k,0,1);
+  const layers=pos<1e-4?1:pos<2-1e-4?2:pos<3-1e-4?4:8;
+  let title;
+  if(pos<1e-4)      title='<b>Flat</b> — 8 panels, 1 layer';
+  else if(pos>2.999) title='<b>Folded</b> — 8 layers';
+  else if(u>1e-4)    title=`<b>${FOLDS[k].name}</b> — ${Math.round(u*100)}%`;
+  else              title=`<b>${FOLDS[k-1].name}</b> — done`;
+  const down=stackFaces(k>2?3:Math.round(pos),Math.round(flip),'bottom')
+              .filter(f=>used.has(faceId(f.cell,f.side))).length;
+  hud.innerHTML=
+    `<div class="chip">${title}</div>`+
+    (flip>0.02?`<div class="chip">packet turned over</div>`:'')+
+    (down>0?`<div class="chip warn"><b>${down}</b> used surface${down>1?'s':''} lying on the table</div>`:'');
+  document.getElementById('posLbl').textContent=pos<1e-4?'flat':pos>2.999?'8 layers':(k+1)+' crease';
+  document.getElementById('layerLbl').textContent=layers+' layer'+(layers>1?'s':'');
+}
+
+/* ============================== PLAN ============================== */
+const STEPS=[
+  {k:3,f:0,act:'Wipe the top of the packet'},
+  {k:3,f:1,act:'Turn the packet over'},
+  {k:2,f:2,act:'Open crease ③'},
+  {k:1,f:2,act:'Open crease ②'},
+  {k:0,f:2,act:'Open crease ① — flat again'},
+];
+function buildPlan(){
+  used=new Set(); const rows=[];
+  STEPS.forEach((s,i)=>{
+    const top=stackFaces(s.k,s.f,'top');
+    const fresh=top.filter(f=>!used.has(faceId(f.cell,f.side)));
+    const take = i===STEPS.length-1 ? fresh.slice(0,1) : fresh;
+    take.forEach(f=>used.add(faceId(f.cell,f.side)));
+    const down=stackFaces(s.k,s.f,'bottom').filter(f=>used.has(faceId(f.cell,f.side))).length;
+    rows.push({...s, i, faces:take, down,
+               risk:top.filter(f=>used.has(faceId(f.cell,f.side)) && !take.includes(f)).length});
+  });
+  return rows;
+}
+const PLAN=buildPlan();
+
+/* render the surface table */
+const tbody=document.getElementById('surfBody');
+PLAN.forEach(r=>{
+  r.faces.forEach((f,j)=>{
+    const tr=document.createElement('tr');
+    tr.dataset.step=r.i; tr.dataset.face=faceId(f.cell,f.side);
+    tr.innerHTML=`<td><span class="n ${f.side==='front'?'c':'d'}">${f.cell}</span></td>
+      <td>${f.side==='front'?'clean side':'underside'}${r.faces.length>1?` · face ${j+1}`:''}</td>
+      <td>${j===0?r.act:'—'}</td>`;
+    tbody.appendChild(tr);
+  });
+});
+function markUsedRows(){
+  [...tbody.children].forEach(tr=>{
+    tr.classList.toggle('done', used.has(tr.dataset.face));
+    tr.classList.toggle('on', hiFaces.includes(tr.dataset.face));
+  });
+}
+
+function gotoStep(i){
+  stepIdx=i; const s=PLAN[i];
+  posT=s.k; flipT=s.f;
+  hiFaces=s.faces.map(f=>faceId(f.cell,f.side));
+  s.faces.forEach(f=>used.add(faceId(f.cell,f.side)));
+  markUsedRows();
+  clearTimeout(runTimer);
+}
+function runAll(){
+  used=new Set(); markUsedRows(); stepIdx=-1;
+  let i=0;
+  const next=()=>{
+    if(i>=PLAN.length) return;
+    gotoStep(i++);
+    runTimer=setTimeout(next, 2600);
+  };
+  next();
+}
+
+/* ============================ CONTROLS ============================ */
+const go=p=>{ posT=clamp(p,0,3); };
+document.getElementById('foldAll').onclick   =()=>go(3);
+document.getElementById('unfoldAll').onclick =()=>go(posT>0.05?0:3);
+document.getElementById('stepF').onclick    =()=>go(Math.min(3,Math.ceil(posT-1e-6)+1));
+document.getElementById('stepB').onclick    =()=>go(posT<3?Math.max(0,Math.floor(posT+1e-6)-1):2);
+document.getElementById('run').onclick       =runAll;
+document.getElementById('reset').onclick     =()=>{yaw=-20;pitch=54;scale=1;};
+posEl.oninput =e=>{ posT=pos=+e.target.value; flipT=Math.round(flipT); };
+document.getElementById('tgCrease').onchange=e=>cloth.classList.toggle('show-creases',e.target.checked);
+document.getElementById('tgNum').onchange   =e=>cloth.classList.toggle('hide-nums',!e.target.checked);
+document.getElementById('tgSpin').onchange  =e=>{spin=e.target.checked;};
+tbody.onclick=e=>{
+  const tr=e.target.closest('tr'); if(!tr) return;
+  used=new Set([...used].filter(f=>f!==tr.dataset.face));
+  gotoStep(+tr.dataset.step);
+};
+cloth.classList.add('show-creases');
+
+/* ============================== LOOP ============================== */
+let last=performance.now();
+function tick(now){
+  const dt=Math.min(50,now-last); last=now;
+  if(spin) yaw+=dt*0.012;
+  const k=reduce?1:1-Math.pow(0.0016, dt/1000);
+  pos+=(posT-pos)*k; flip+=(flipT-flip)*k;
+  if(Math.abs(posT-pos)<0.0006) pos=posT;
+  if(Math.abs(flipT-flip)<0.0006) flip=flipT;
+  render(); markUsedRows();
+  requestAnimationFrame(tick);
+}
+
+/* ============================== ORBIT ============================= */
+let drag=null;
+stage.addEventListener('pointerdown',e=>{
+  drag={x:e.clientX,y:e.clientY}; stage.classList.add('drag');
+  stage.setPointerCapture(e.pointerId);
+});
+stage.addEventListener('pointermove',e=>{
+  if(!drag) return;
+  yaw   -= (e.clientX-drag.x)*0.42;
+  pitch  = clamp(pitch-(e.clientY-drag.y)*0.42,-88,88);
+  drag={x:e.clientX,y:e.clientY};
+});
+const endDrag=()=>{drag=null;stage.classList.remove('drag');};
+stage.addEventListener('pointerup',endDrag);
+stage.addEventListener('pointercancel',endDrag);
+stage.addEventListener('wheel',e=>{
+  e.preventDefault(); scale=clamp(scale*(e.deltaY>0?0.94:1.06),0.35,2.4);
+},{passive:false});
+
+/* ============================== NOTES ============================= */
+document.getElementById('surfNote').innerHTML =
+  `Click any row to jump there. <b class="risk">Used faces on the table</b> is the cost of the `+
+  `quarters fold: every time you open a crease you lay your finished, dirty faces down on the `+
+  `worktop. The roll fold has no opens at all.`;
+
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
